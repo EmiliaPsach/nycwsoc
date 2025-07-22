@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   TextInput,
@@ -14,6 +13,18 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { DataStore } from '../services/DataStore';
 import { User } from '../types';
+import {
+  globalStyles,
+  headerStyles,
+  textStyles,
+  buttonStyles,
+  formStyles,
+  modalStyles,
+  colors,
+  spacing,
+  typography,
+  borderRadius
+} from '../styles';
 
 const ProfileScreen = () => {
   const { user, logout, setUser } = useAuth();
@@ -62,8 +73,8 @@ const ProfileScreen = () => {
 
   if (!user || !editedUser) {
     return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading profile...</Text>
+      <View style={globalStyles.loadingContainer}>
+        <Text style={globalStyles.loadingText}>Loading profile...</Text>
       </View>
     );
   }
@@ -85,24 +96,41 @@ const ProfileScreen = () => {
     multiline?: boolean;
     keyboardType?: 'default' | 'email-address' | 'phone-pad';
   }) => (
-    <View style={styles.fieldContainer}>
-      <Text style={styles.fieldLabel}>{label}</Text>
+    <View style={formStyles.inputContainer}>
+      <Text style={formStyles.label}>{label}</Text>
       {isEditing ? (
         options ? (
-          <View style={styles.optionsContainer}>
+          <View style={{flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm}}>
             {options.map((option) => (
               <TouchableOpacity
                 key={option}
                 style={[
-                  styles.optionButton,
-                  value === option && styles.selectedOption,
+                  {
+                    paddingHorizontal: spacing.lg,
+                    paddingVertical: spacing.sm,
+                    borderWidth: 1,
+                    borderColor: colors.border.light,
+                    borderRadius: borderRadius.full,
+                    backgroundColor: colors.background.card,
+                  },
+                  value === option && {
+                    backgroundColor: colors.primary,
+                    borderColor: colors.primary,
+                  },
                 ]}
                 onPress={() => onChangeText(option)}
               >
                 <Text
                   style={[
-                    styles.optionText,
-                    value === option && styles.selectedOptionText,
+                    {
+                      fontSize: typography.size.sm,
+                      color: colors.text.secondary,
+                      fontWeight: typography.weight.medium,
+                    },
+                    value === option && {
+                      color: colors.text.inverse,
+                      fontWeight: typography.weight.semiBold,
+                    },
                   ]}
                 >
                   {option}
@@ -112,7 +140,7 @@ const ProfileScreen = () => {
           </View>
         ) : (
           <TextInput
-            style={[styles.input, multiline && styles.multilineInput]}
+            style={[formStyles.input, multiline && {height: 80, textAlignVertical: 'top'}]}
             value={value || ''}
             onChangeText={onChangeText}
             placeholder={placeholder}
@@ -122,52 +150,52 @@ const ProfileScreen = () => {
           />
         )
       ) : (
-        <Text style={styles.fieldValue}>{value || 'Not specified'}</Text>
+        <Text style={[textStyles.body, {paddingVertical: spacing.md, paddingHorizontal: spacing.lg, backgroundColor: colors.background.main, borderRadius: borderRadius.sm}]}>{value || 'Not specified'}</Text>
       )}
     </View>
   );
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={globalStyles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Profile</Text>
-        <View style={styles.headerButtons}>
+      <View style={[headerStyles.header, {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}]}>
+        <Text style={headerStyles.headerTitle}>Profile</Text>
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
           {isEditing ? (
             <>
               <TouchableOpacity
-                style={[styles.headerButton, styles.cancelButton]}
+                style={[buttonStyles.small, {backgroundColor: colors.text.secondary, marginRight: spacing.sm}]}
                 onPress={handleCancel}
               >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
+                <Text style={buttonStyles.smallText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.headerButton, styles.saveButton]}
+                style={[buttonStyles.small, {backgroundColor: colors.secondary}]}
                 onPress={handleSave}
                 disabled={loading}
               >
-                <Text style={styles.saveButtonText}>
+                <Text style={buttonStyles.smallText}>
                   {loading ? 'Saving...' : 'Save'}
                 </Text>
               </TouchableOpacity>
             </>
           ) : (
             <TouchableOpacity
-              style={[styles.headerButton, styles.editButton]}
+              style={buttonStyles.small}
               onPress={() => setIsEditing(true)}
             >
-              <Text style={styles.editButtonText}>Edit</Text>
+              <Text style={buttonStyles.smallText}>Edit</Text>
             </TouchableOpacity>
           )}
         </View>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.avatarContainer}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
+      <ScrollView style={{flex: 1}} showsVerticalScrollIndicator={false}>
+        <View style={{alignItems: 'center', padding: spacing.xxxl, backgroundColor: colors.background.card}}>
+          <View style={{width: 80, height: 80, borderRadius: 40, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center', marginBottom: spacing.md}}>
+            <Text style={{color: colors.text.inverse, fontSize: typography.size.xxl, fontWeight: typography.weight.bold}}>
               {user.name
                 .split(' ')
                 .map((n) => n[0])
@@ -175,12 +203,12 @@ const ProfileScreen = () => {
                 .toUpperCase()}
             </Text>
           </View>
-          <Text style={styles.userName}>{user.name}</Text>
-          <Text style={styles.userEmail}>{user.email}</Text>
+          <Text style={[textStyles.title, {fontSize: typography.size.xl, marginBottom: spacing.xs}]}>{user.name}</Text>
+          <Text style={textStyles.subtitle}>{user.email}</Text>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Personal Information</Text>
+        <View style={{backgroundColor: colors.background.card, marginTop: spacing.xl, paddingHorizontal: spacing.xl, paddingVertical: spacing.xl}}>
+          <Text style={[textStyles.title, {fontSize: typography.size.lg, marginBottom: spacing.xl}]}>Personal Information</Text>
 
           <ProfileField
             label="Full Name"
@@ -217,8 +245,8 @@ const ProfileScreen = () => {
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Soccer Preferences</Text>
+        <View style={{backgroundColor: colors.background.card, marginTop: spacing.xl, paddingHorizontal: spacing.xl, paddingVertical: spacing.xl}}>
+          <Text style={[textStyles.title, {fontSize: typography.size.lg, marginBottom: spacing.xl}]}>Soccer Preferences</Text>
 
           <ProfileField
             label="Skill Level"
@@ -257,60 +285,60 @@ const ProfileScreen = () => {
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Account Information</Text>
+        <View style={{backgroundColor: colors.background.card, marginTop: spacing.xl, paddingHorizontal: spacing.xl, paddingVertical: spacing.xl}}>
+          <Text style={[textStyles.title, {fontSize: typography.size.lg, marginBottom: spacing.xl}]}>Account Information</Text>
           
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Member Since:</Text>
-            <Text style={styles.infoValue}>
+          <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.border.light}}>
+            <Text style={[textStyles.body, {color: colors.text.secondary}]}>Member Since:</Text>
+            <Text style={[textStyles.body, {fontWeight: typography.weight.medium}]}>
               {new Date(user.createdAt).toLocaleDateString()}
             </Text>
           </View>
           
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Teams:</Text>
-            <Text style={styles.infoValue}>
+          <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.border.light}}>
+            <Text style={[textStyles.body, {color: colors.text.secondary}]}>Teams:</Text>
+            <Text style={[textStyles.body, {fontWeight: typography.weight.medium}]}>
               {user.teams.length} {user.teams.length === 1 ? 'team' : 'teams'}
             </Text>
           </View>
           
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Status:</Text>
-            <Text style={[styles.infoValue, styles.activeStatus]}>
+          <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.border.light}}>
+            <Text style={[textStyles.body, {color: colors.text.secondary}]}>Status:</Text>
+            <Text style={[textStyles.body, {fontWeight: typography.weight.semiBold, color: colors.secondary}]}>
               {user.isActive ? 'Active' : 'Inactive'}
             </Text>
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Actions</Text>
+        <View style={{backgroundColor: colors.background.card, marginTop: spacing.xl, paddingHorizontal: spacing.xl, paddingVertical: spacing.xl}}>
+          <Text style={[textStyles.title, {fontSize: typography.size.lg, marginBottom: spacing.xl}]}>Actions</Text>
           
           <TouchableOpacity 
-            style={styles.actionButton}
+            style={{paddingVertical: spacing.lg, paddingHorizontal: spacing.lg, borderBottomWidth: 1, borderBottomColor: colors.border.light}}
             onPress={() => Alert.alert('Contact Support', 'Please email support@nycwsoc.com for assistance.')}
           >
-            <Text style={styles.actionButtonText}>Contact Support</Text>
+            <Text style={[textStyles.body, {color: colors.primary, fontWeight: typography.weight.medium}]}>Contact Support</Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
-            style={styles.actionButton}
+            style={{paddingVertical: spacing.lg, paddingHorizontal: spacing.lg, borderBottomWidth: 1, borderBottomColor: colors.border.light}}
             onPress={() => Alert.alert('Privacy Policy', 'Privacy policy details would be shown here.')}
           >
-            <Text style={styles.actionButtonText}>Privacy Policy</Text>
+            <Text style={[textStyles.body, {color: colors.primary, fontWeight: typography.weight.medium}]}>Privacy Policy</Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
-            style={styles.actionButton}
+            style={{paddingVertical: spacing.lg, paddingHorizontal: spacing.lg, borderBottomWidth: 1, borderBottomColor: colors.border.light}}
             onPress={() => Alert.alert('Terms of Service', 'Terms of service would be shown here.')}
           >
-            <Text style={styles.actionButtonText}>Terms of Service</Text>
+            <Text style={[textStyles.body, {color: colors.primary, fontWeight: typography.weight.medium}]}>Terms of Service</Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
-            style={[styles.actionButton, styles.logoutButton]}
+            style={{paddingVertical: spacing.lg, paddingHorizontal: spacing.lg}}
             onPress={handleLogout}
           >
-            <Text style={[styles.actionButtonText, styles.logoutButtonText]}>
+            <Text style={[textStyles.body, {color: colors.danger, fontWeight: typography.weight.semiBold}]}>
               Sign Out
             </Text>
           </TouchableOpacity>
@@ -324,24 +352,24 @@ const ProfileScreen = () => {
         visible={confirmLogoutVisible}
         onRequestClose={() => setConfirmLogoutVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Sign Out</Text>
-            <Text style={styles.modalMessage}>
+        <View style={modalStyles.overlay}>
+          <View style={[modalStyles.container, {alignItems: 'center'}]}>
+            <Text style={modalStyles.title}>Sign Out</Text>
+            <Text style={[textStyles.body, {color: colors.text.secondary, textAlign: 'center', marginBottom: spacing.xxl, lineHeight: typography.size.md * typography.lineHeight.relaxed}]}>
               Are you sure you want to sign out of your account?
             </Text>
-            <View style={styles.modalButtons}>
+            <View style={{flexDirection: 'row', justifyContent: 'space-between', width: '100%'}}>
               <TouchableOpacity
-                style={[styles.modalButton, styles.cancelModalButton]}
+                style={[{flex: 1, paddingVertical: spacing.md, paddingHorizontal: spacing.xl, borderRadius: borderRadius.sm, alignItems: 'center', backgroundColor: colors.background.disabled, marginRight: spacing.sm}]}
                 onPress={() => setConfirmLogoutVisible(false)}
               >
-                <Text style={styles.cancelModalButtonText}>Cancel</Text>
+                <Text style={[textStyles.body, {color: colors.text.secondary, fontWeight: typography.weight.semiBold}]}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.modalButton, styles.confirmModalButton]}
+                style={[{flex: 1, paddingVertical: spacing.md, paddingHorizontal: spacing.xl, borderRadius: borderRadius.sm, alignItems: 'center', backgroundColor: colors.danger, marginLeft: spacing.sm}]}
                 onPress={confirmLogout}
               >
-                <Text style={styles.confirmModalButtonText}>Sign Out</Text>
+                <Text style={[textStyles.body, {color: colors.text.inverse, fontWeight: typography.weight.semiBold}]}>Sign Out</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -351,266 +379,5 @@ const ProfileScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 18,
-    color: '#666',
-  },
-  header: {
-    backgroundColor: '#fff',
-    paddingTop: 50,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e1e5e9',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  headerButtons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  headerButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-    marginLeft: 8,
-  },
-  editButton: {
-    backgroundColor: '#007AFF',
-  },
-  editButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  saveButton: {
-    backgroundColor: '#34C759',
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  cancelButton: {
-    backgroundColor: '#8E8E93',
-  },
-  cancelButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  content: {
-    flex: 1,
-  },
-  avatarContainer: {
-    alignItems: 'center',
-    padding: 30,
-    backgroundColor: '#fff',
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#007AFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  avatarText: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  userName: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
-  },
-  userEmail: {
-    fontSize: 16,
-    color: '#666',
-  },
-  section: {
-    backgroundColor: '#fff',
-    marginTop: 20,
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 20,
-  },
-  fieldContainer: {
-    marginBottom: 20,
-  },
-  fieldLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
-  },
-  fieldValue: {
-    fontSize: 16,
-    color: '#666',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    color: '#333',
-    backgroundColor: '#fff',
-  },
-  multilineInput: {
-    height: 80,
-    textAlignVertical: 'top',
-  },
-  optionsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  optionButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 20,
-    backgroundColor: '#fff',
-  },
-  selectedOption: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
-  },
-  optionText: {
-    fontSize: 14,
-    color: '#666',
-    fontWeight: '500',
-  },
-  selectedOptionText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f1f1',
-  },
-  infoLabel: {
-    fontSize: 16,
-    color: '#666',
-  },
-  infoValue: {
-    fontSize: 16,
-    color: '#333',
-    fontWeight: '500',
-  },
-  activeStatus: {
-    color: '#34C759',
-    fontWeight: '600',
-  },
-  actionButton: {
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f1f1',
-  },
-  actionButtonText: {
-    fontSize: 16,
-    color: '#007AFF',
-    fontWeight: '500',
-  },
-  logoutButton: {
-    borderBottomWidth: 0,
-  },
-  logoutButtonText: {
-    color: '#FF3B30',
-    fontWeight: '600',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 24,
-    width: '80%',
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 12,
-  },
-  modalMessage: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 24,
-    lineHeight: 22,
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  modalButton: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  cancelModalButton: {
-    backgroundColor: '#f1f1f1',
-    marginRight: 8,
-  },
-  cancelModalButtonText: {
-    color: '#666',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  confirmModalButton: {
-    backgroundColor: '#FF3B30',
-    marginLeft: 8,
-  },
-  confirmModalButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});
 
 export default ProfileScreen;

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   RefreshControl,
@@ -15,6 +14,20 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { DataStore } from '../services/DataStore';
 import { League, FreeAgentRegistration } from '../types';
+import {
+  globalStyles,
+  cardStyles,
+  headerStyles,
+  textStyles,
+  buttonStyles,
+  formStyles,
+  modalStyles,
+  colors,
+  spacing,
+  typography,
+  borderRadius,
+  statusStyles
+} from '../styles';
 
 const JoinLeaguesScreen = ({ navigation }: any) => {
   const { user } = useAuth();
@@ -147,11 +160,11 @@ const JoinLeaguesScreen = ({ navigation }: any) => {
 
   const getSkillLevelColor = (skillLevel: string) => {
     switch (skillLevel) {
-      case 'Beginner': return '#34C759';
-      case 'Intermediate': return '#FF9500';
-      case 'Advanced': return '#FF3B30';
-      case 'All Levels': return '#007AFF';
-      default: return '#666';
+      case 'Beginner': return colors.secondary;
+      case 'Intermediate': return colors.warning;
+      case 'Advanced': return colors.danger;
+      case 'All Levels': return colors.primary;
+      default: return colors.text.secondary;
     }
   };
 
@@ -174,73 +187,73 @@ const JoinLeaguesScreen = ({ navigation }: any) => {
 
     return (
       <TouchableOpacity 
-        style={styles.leagueCard}
+        style={cardStyles.card}
         onPress={() => {
           setSelectedLeague(league);
           setModalVisible(true);
         }}
       >
-        <View style={styles.leagueHeader}>
-          <Text style={styles.leagueName}>{league.name}</Text>
-          <View style={[styles.skillBadge, { backgroundColor: getSkillLevelColor(league.skillLevel) }]}>
-            <Text style={styles.skillText}>{league.skillLevel}</Text>
+        <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm}}>
+          <Text style={[textStyles.title, {fontSize: typography.size.lg, flex: 1}]}>{league.name}</Text>
+          <View style={[statusStyles.badge, { backgroundColor: getSkillLevelColor(league.skillLevel) }]}>
+            <Text style={[statusStyles.badgeText, {color: colors.text.inverse, textTransform: 'none'}]}>{league.skillLevel}</Text>
           </View>
         </View>
 
-        <Text style={styles.leagueDescription}>{league.description}</Text>
+        <Text style={[textStyles.body, {color: colors.text.secondary, lineHeight: typography.size.sm * typography.lineHeight.relaxed, marginBottom: spacing.md}]}>{league.description}</Text>
 
-        <View style={styles.leagueDetails}>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>📍 Location:</Text>
-            <Text style={styles.detailValue}>{league.location}</Text>
+        <View style={{marginBottom: spacing.md}}>
+          <View style={{flexDirection: 'row', marginBottom: spacing.xs}}>
+            <Text style={[textStyles.caption, {width: 100}]}>📍 Location:</Text>
+            <Text style={[textStyles.body, {fontWeight: typography.weight.medium, flex: 1}]}>{league.location}</Text>
           </View>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>🗓️ Schedule:</Text>
-            <Text style={styles.detailValue}>{league.dayOfWeek}s at {league.time}</Text>
+          <View style={{flexDirection: 'row', marginBottom: spacing.xs}}>
+            <Text style={[textStyles.caption, {width: 100}]}>🗓️ Schedule:</Text>
+            <Text style={[textStyles.body, {fontWeight: typography.weight.medium, flex: 1}]}>{league.dayOfWeek}s at {league.time}</Text>
           </View>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>🎯 Season:</Text>
-            <Text style={styles.detailValue}>{league.season}</Text>
+          <View style={{flexDirection: 'row', marginBottom: spacing.xs}}>
+            <Text style={[textStyles.caption, {width: 100}]}>🎯 Season:</Text>
+            <Text style={[textStyles.body, {fontWeight: typography.weight.medium, flex: 1}]}>{league.season}</Text>
           </View>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>💰 Price:</Text>
-            <Text style={styles.detailValue}>${league.price}</Text>
+          <View style={{flexDirection: 'row', marginBottom: spacing.xs}}>
+            <Text style={[textStyles.caption, {width: 100}]}>💰 Price:</Text>
+            <Text style={[textStyles.body, {fontWeight: typography.weight.medium, flex: 1}]}>${league.price}</Text>
           </View>
         </View>
 
-        <View style={styles.leagueFooter}>
-          <View style={styles.capacityInfo}>
-            <Text style={styles.capacityText}>
+        <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+          <View style={{flex: 1}}>
+            <Text style={textStyles.small}>
               {league.currentTeams}/{league.maxTeams} teams
             </Text>
             {daysLeft > 0 && (
-              <Text style={[styles.deadlineText, daysLeft <= 7 && styles.urgentDeadline]}>
+              <Text style={[textStyles.small, {color: colors.warning, marginTop: 2}, daysLeft <= 7 && {color: colors.danger, fontWeight: typography.weight.bold}]}>
                 {daysLeft} days left to register
               </Text>
             )}
           </View>
 
           {registered ? (
-            <View style={[styles.statusBadge, styles[`${registrationStatus}Status`]]}>
-              <Text style={[styles.statusText, styles[`${registrationStatus}StatusText`]]}>
+            <View style={[statusStyles.badge, registrationStatus === 'Pending' ? {backgroundColor: '#FFF3CD'} : registrationStatus === 'Assigned' ? {backgroundColor: '#D4EDDA'} : {}]}>
+              <Text style={[statusStyles.badgeText, {textTransform: 'none'}, registrationStatus === 'Pending' ? {color: '#856404'} : registrationStatus === 'Assigned' ? {color: '#155724'} : {}]}>
                 {registrationStatus === 'Pending' ? 'Applied' : registrationStatus}
               </Text>
             </View>
           ) : daysLeft <= 0 ? (
-            <View style={[styles.statusBadge, styles.expiredStatus]}>
-              <Text style={[styles.statusText, styles.expiredStatusText]}>
+            <View style={[statusStyles.badge, {backgroundColor: '#F8D7DA'}]}>
+              <Text style={[statusStyles.badgeText, {color: '#721C24', textTransform: 'none'}]}>
                 Registration Closed
               </Text>
             </View>
           ) : (
             <TouchableOpacity 
-              style={styles.joinButton}
+              style={buttonStyles.small}
               onPress={() => {
                 setSelectedLeague(league);
                 setModalVisible(true);
               }}
             >
-              <Text style={styles.joinButtonText}>Join League</Text>
+              <Text style={buttonStyles.smallText}>Join League</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -250,80 +263,80 @@ const JoinLeaguesScreen = ({ navigation }: any) => {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading leagues...</Text>
+      <View style={globalStyles.loadingContainer}>
+        <Text style={globalStyles.loadingText}>Loading leagues...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Join Leagues</Text>
+    <View style={globalStyles.container}>
+      <View style={[headerStyles.header, {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}]}>
+        <Text style={headerStyles.headerTitle}>Join Leagues</Text>
         <TouchableOpacity
-          style={styles.filterButton}
+          style={buttonStyles.small}
           onPress={() => setShowFilters(!showFilters)}
         >
-          <Text style={styles.filterButtonText}>
+          <Text style={buttonStyles.smallText}>
             {showFilters ? 'Hide Filters' : 'Show Filters'}
           </Text>
         </TouchableOpacity>
       </View>
 
       {showFilters && (
-        <View style={styles.filtersContainer}>
+        <View style={{backgroundColor: colors.background.card, padding: spacing.xl, borderBottomWidth: 1, borderBottomColor: colors.border.medium}}>
           <TextInput
-            style={styles.searchInput}
+            style={[formStyles.input, {marginBottom: spacing.md}]}
             placeholder="Search leagues..."
             value={searchText}
             onChangeText={setSearchText}
           />
           
-          <View style={styles.filterRow}>
+          <View style={{flexDirection: 'row', justifyContent: 'space-between', marginBottom: spacing.md}}>
             <TextInput
-              style={styles.filterInput}
+              style={[formStyles.input, {width: '30%', fontSize: typography.size.sm, paddingHorizontal: spacing.sm, paddingVertical: spacing.sm}]}
               placeholder="Location"
               value={locationFilter}
               onChangeText={setLocationFilter}
             />
             <TextInput
-              style={styles.filterInput}
+              style={[formStyles.input, {width: '30%', fontSize: typography.size.sm, paddingHorizontal: spacing.sm, paddingVertical: spacing.sm}]}
               placeholder="Skill Level"
               value={skillFilter}
               onChangeText={setSkillFilter}
             />
             <TextInput
-              style={styles.filterInput}
+              style={[formStyles.input, {width: '30%', fontSize: typography.size.sm, paddingHorizontal: spacing.sm, paddingVertical: spacing.sm}]}
               placeholder="Day of Week"
               value={dayFilter}
               onChangeText={setDayFilter}
             />
           </View>
           
-          <TouchableOpacity style={styles.clearFiltersButton} onPress={clearFilters}>
-            <Text style={styles.clearFiltersText}>Clear Filters</Text>
+          <TouchableOpacity style={{alignSelf: 'center', paddingVertical: spacing.sm}} onPress={clearFilters}>
+            <Text style={[textStyles.link, {fontSize: typography.size.sm}]}>Clear Filters</Text>
           </TouchableOpacity>
         </View>
       )}
 
       <ScrollView
-        style={styles.content}
+        style={{flex: 1}}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
         {filteredLeagues.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>⚽</Text>
-            <Text style={styles.emptyTitle}>No Leagues Found</Text>
-            <Text style={styles.emptyText}>
+          <View style={globalStyles.emptyState}>
+            <Text style={{fontSize: 64, marginBottom: spacing.lg}}>⚽</Text>
+            <Text style={[textStyles.title, {marginBottom: spacing.sm, fontSize: typography.size.xl}]}>No Leagues Found</Text>
+            <Text style={[globalStyles.emptyText, {lineHeight: typography.size.md * typography.lineHeight.relaxed}]}>
               {searchText || locationFilter || skillFilter || dayFilter
                 ? 'Try adjusting your filters'
                 : 'Check back later for new leagues'}
             </Text>
             {(searchText || locationFilter || skillFilter || dayFilter) && (
-              <TouchableOpacity style={styles.emptyButton} onPress={clearFilters}>
-                <Text style={styles.emptyButtonText}>Clear Filters</Text>
+              <TouchableOpacity style={[buttonStyles.primary, {paddingHorizontal: spacing.xxl, paddingVertical: spacing.md}]} onPress={clearFilters}>
+                <Text style={buttonStyles.primaryText}>Clear Filters</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -341,92 +354,110 @@ const JoinLeaguesScreen = ({ navigation }: any) => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+        <View style={modalStyles.overlay}>
+          <View style={[modalStyles.container, {borderRadius: spacing.xl, width: '90%', maxHeight: '80%'}]}>
             {selectedLeague && (
               <>
-                <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>{selectedLeague.name}</Text>
+                <View style={[modalStyles.header, {padding: spacing.xl}]}>
+                  <Text style={[modalStyles.title, {flex: 1}]}>{selectedLeague.name}</Text>
                   <TouchableOpacity
-                    style={styles.closeButton}
+                    style={modalStyles.closeButton}
                     onPress={() => setModalVisible(false)}
                   >
-                    <Text style={styles.closeButtonText}>✕</Text>
+                    <Text style={[textStyles.body, {fontSize: typography.size.lg, color: colors.text.secondary}]}>✕</Text>
                   </TouchableOpacity>
                 </View>
 
-                <ScrollView style={styles.modalBody}>
-                  <Text style={styles.modalDescription}>
+                <ScrollView style={{padding: spacing.xl}}>
+                  <Text style={[textStyles.body, {color: colors.text.secondary, lineHeight: typography.size.md * typography.lineHeight.relaxed, marginBottom: spacing.xl}]}>
                     {selectedLeague.description}
                   </Text>
 
-                  <View style={styles.modalDetails}>
-                    <Text style={styles.modalDetailTitle}>League Details</Text>
+                  <View style={{marginBottom: spacing.xl}}>
+                    <Text style={[textStyles.title, {fontSize: typography.size.lg, marginBottom: spacing.md}]}>League Details</Text>
                     
-                    <View style={styles.modalDetailRow}>
-                      <Text style={styles.modalDetailLabel}>Location:</Text>
-                      <Text style={styles.modalDetailValue}>{selectedLeague.location}</Text>
+                    <View style={{flexDirection: 'row', marginBottom: spacing.sm}}>
+                      <Text style={[textStyles.caption, {width: 120}]}>Location:</Text>
+                      <Text style={[textStyles.body, {fontWeight: typography.weight.medium, flex: 1}]}>{selectedLeague.location}</Text>
                     </View>
                     
-                    <View style={styles.modalDetailRow}>
-                      <Text style={styles.modalDetailLabel}>Schedule:</Text>
-                      <Text style={styles.modalDetailValue}>
+                    <View style={{flexDirection: 'row', marginBottom: spacing.sm}}>
+                      <Text style={[textStyles.caption, {width: 120}]}>Schedule:</Text>
+                      <Text style={[textStyles.body, {fontWeight: typography.weight.medium, flex: 1}]}>
                         {selectedLeague.dayOfWeek}s at {selectedLeague.time}
                       </Text>
                     </View>
                     
-                    <View style={styles.modalDetailRow}>
-                      <Text style={styles.modalDetailLabel}>Season:</Text>
-                      <Text style={styles.modalDetailValue}>
+                    <View style={{flexDirection: 'row', marginBottom: spacing.sm}}>
+                      <Text style={[textStyles.caption, {width: 120}]}>Season:</Text>
+                      <Text style={[textStyles.body, {fontWeight: typography.weight.medium, flex: 1}]}>
                         {selectedLeague.season} ({formatDate(selectedLeague.startDate)} - {formatDate(selectedLeague.endDate)})
                       </Text>
                     </View>
                     
-                    <View style={styles.modalDetailRow}>
-                      <Text style={styles.modalDetailLabel}>Skill Level:</Text>
-                      <Text style={styles.modalDetailValue}>{selectedLeague.skillLevel}</Text>
+                    <View style={{flexDirection: 'row', marginBottom: spacing.sm}}>
+                      <Text style={[textStyles.caption, {width: 120}]}>Skill Level:</Text>
+                      <Text style={[textStyles.body, {fontWeight: typography.weight.medium, flex: 1}]}>{selectedLeague.skillLevel}</Text>
                     </View>
                     
-                    <View style={styles.modalDetailRow}>
-                      <Text style={styles.modalDetailLabel}>Price:</Text>
-                      <Text style={styles.modalDetailValue}>${selectedLeague.price}</Text>
+                    <View style={{flexDirection: 'row', marginBottom: spacing.sm}}>
+                      <Text style={[textStyles.caption, {width: 120}]}>Price:</Text>
+                      <Text style={[textStyles.body, {fontWeight: typography.weight.medium, flex: 1}]}>${selectedLeague.price}</Text>
                     </View>
                     
-                    <View style={styles.modalDetailRow}>
-                      <Text style={styles.modalDetailLabel}>Teams:</Text>
-                      <Text style={styles.modalDetailValue}>
+                    <View style={{flexDirection: 'row', marginBottom: spacing.sm}}>
+                      <Text style={[textStyles.caption, {width: 120}]}>Teams:</Text>
+                      <Text style={[textStyles.body, {fontWeight: typography.weight.medium, flex: 1}]}>
                         {selectedLeague.currentTeams}/{selectedLeague.maxTeams}
                       </Text>
                     </View>
                     
-                    <View style={styles.modalDetailRow}>
-                      <Text style={styles.modalDetailLabel}>Registration Deadline:</Text>
-                      <Text style={styles.modalDetailValue}>
+                    <View style={{flexDirection: 'row', marginBottom: spacing.sm}}>
+                      <Text style={[textStyles.caption, {width: 120}]}>Registration Deadline:</Text>
+                      <Text style={[textStyles.body, {fontWeight: typography.weight.medium, flex: 1}]}>
                         {formatDate(selectedLeague.registrationDeadline)}
                       </Text>
                     </View>
                   </View>
 
                   {!isRegistered(selectedLeague.id) && getDaysUntilDeadline(selectedLeague.registrationDeadline) > 0 && (
-                    <View style={styles.joinOptions}>
-                      <Text style={styles.joinOptionsTitle}>How would you like to join?</Text>
+                    <View style={{marginBottom: spacing.xl}}>
+                      <Text style={[textStyles.body, {fontWeight: typography.weight.bold, marginBottom: spacing.md}]}>How would you like to join?</Text>
                       
                       <TouchableOpacity
-                        style={[styles.joinOptionButton, joinType === 'freeAgent' && styles.selectedJoinOption]}
+                        style={[{
+                          borderWidth: 2,
+                          borderColor: colors.border.medium,
+                          borderRadius: borderRadius.md,
+                          padding: spacing.lg,
+                          marginBottom: spacing.md,
+                        }, joinType === 'freeAgent' && {
+                          borderColor: colors.primary,
+                          backgroundColor: '#F0F8FF',
+                        }]}
                         onPress={() => setJoinType('freeAgent')}
                       >
-                        <Text style={styles.joinOptionTitle}>Join as Free Agent</Text>
-                        <Text style={styles.joinOptionDescription}>
+                        <Text style={[textStyles.body, {fontWeight: typography.weight.bold, marginBottom: spacing.xs}]}>Join as Free Agent</Text>
+                        <Text style={[textStyles.caption, {lineHeight: typography.size.sm * typography.lineHeight.normal}]}>
                           We'll assign you to a team that needs players
                         </Text>
                       </TouchableOpacity>
                       
                       <TouchableOpacity
-                        style={[styles.joinOptionButton, joinType === 'team' && styles.selectedJoinOption]}
+                        style={[{
+                          borderWidth: 2,
+                          borderColor: colors.border.medium,
+                          borderRadius: borderRadius.md,
+                          padding: spacing.lg,
+                          marginBottom: spacing.md,
+                        }, joinType === 'team' && {
+                          borderColor: colors.primary,
+                          backgroundColor: '#F0F8FF',
+                        }]}
                         onPress={() => setJoinType('team')}
                       >
-                        <Text style={styles.joinOptionTitle}>Register Existing Team</Text>
-                        <Text style={styles.joinOptionDescription}>
+                        <Text style={[textStyles.body, {fontWeight: typography.weight.bold, marginBottom: spacing.xs}]}>Register Existing Team</Text>
+                        <Text style={[textStyles.caption, {lineHeight: typography.size.sm * typography.lineHeight.normal}]}>
                           Register your pre-formed team for this league
                         </Text>
                       </TouchableOpacity>
@@ -434,21 +465,21 @@ const JoinLeaguesScreen = ({ navigation }: any) => {
                   )}
                 </ScrollView>
 
-                <View style={styles.modalFooter}>
+                <View style={[modalStyles.footer, {padding: spacing.xl}]}>
                   {isRegistered(selectedLeague.id) ? (
-                    <Text style={styles.alreadyRegisteredText}>
+                    <Text style={[textStyles.body, {color: colors.text.secondary, textAlign: 'center', fontStyle: 'italic'}]}>
                       You're already registered for this league
                     </Text>
                   ) : getDaysUntilDeadline(selectedLeague.registrationDeadline) <= 0 ? (
-                    <Text style={styles.registrationClosedText}>
+                    <Text style={[textStyles.body, {color: colors.danger, textAlign: 'center', fontWeight: typography.weight.semiBold}]}>
                       Registration period has ended
                     </Text>
                   ) : (
                     <TouchableOpacity
-                      style={styles.modalJoinButton}
+                      style={[buttonStyles.primary, {borderRadius: borderRadius.md}]}
                       onPress={() => handleJoinLeague(joinType)}
                     >
-                      <Text style={styles.modalJoinButtonText}>
+                      <Text style={buttonStyles.primaryText}>
                         {joinType === 'freeAgent' ? 'Join as Free Agent' : 'Register Team'}
                       </Text>
                     </TouchableOpacity>
@@ -463,363 +494,5 @@ const JoinLeaguesScreen = ({ navigation }: any) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 18,
-    color: '#666',
-  },
-  header: {
-    backgroundColor: '#fff',
-    paddingTop: 50,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e1e5e9',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  filterButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  filterButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  filtersContainer: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e1e5e9',
-  },
-  searchInput: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginBottom: 12,
-    fontSize: 16,
-  },
-  filterRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  filterInput: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-    width: '30%',
-    fontSize: 14,
-  },
-  clearFiltersButton: {
-    alignSelf: 'center',
-    paddingVertical: 8,
-  },
-  clearFiltersText: {
-    color: '#007AFF',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  content: {
-    flex: 1,
-  },
-  leagueCard: {
-    backgroundColor: '#fff',
-    marginHorizontal: 20,
-    marginVertical: 8,
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  leagueHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  leagueName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    flex: 1,
-  },
-  skillBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  skillText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  leagueDescription: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 20,
-    marginBottom: 12,
-  },
-  leagueDetails: {
-    marginBottom: 12,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    marginBottom: 4,
-  },
-  detailLabel: {
-    fontSize: 14,
-    color: '#666',
-    width: 100,
-  },
-  detailValue: {
-    fontSize: 14,
-    color: '#333',
-    fontWeight: '500',
-    flex: 1,
-  },
-  leagueFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  capacityInfo: {
-    flex: 1,
-  },
-  capacityText: {
-    fontSize: 12,
-    color: '#666',
-  },
-  deadlineText: {
-    fontSize: 12,
-    color: '#FF9500',
-    marginTop: 2,
-  },
-  urgentDeadline: {
-    color: '#FF3B30',
-    fontWeight: 'bold',
-  },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  PendingStatus: {
-    backgroundColor: '#FFF3CD',
-  },
-  PendingStatusText: {
-    color: '#856404',
-  },
-  AssignedStatus: {
-    backgroundColor: '#D4EDDA',
-  },
-  AssignedStatusText: {
-    color: '#155724',
-  },
-  expiredStatus: {
-    backgroundColor: '#F8D7DA',
-  },
-  expiredStatusText: {
-    color: '#721C24',
-  },
-  joinButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  joinButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  emptyState: {
-    alignItems: 'center',
-    padding: 60,
-    marginTop: 60,
-  },
-  emptyIcon: {
-    fontSize: 64,
-    marginBottom: 16,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 20,
-    lineHeight: 22,
-  },
-  emptyButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 10,
-  },
-  emptyButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    width: '90%',
-    maxHeight: '80%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e1e5e9',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    flex: 1,
-  },
-  closeButton: {
-    padding: 4,
-  },
-  closeButtonText: {
-    fontSize: 18,
-    color: '#666',
-  },
-  modalBody: {
-    padding: 20,
-  },
-  modalDescription: {
-    fontSize: 16,
-    color: '#666',
-    lineHeight: 22,
-    marginBottom: 20,
-  },
-  modalDetails: {
-    marginBottom: 20,
-  },
-  modalDetailTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 12,
-  },
-  modalDetailRow: {
-    flexDirection: 'row',
-    marginBottom: 8,
-  },
-  modalDetailLabel: {
-    fontSize: 14,
-    color: '#666',
-    width: 120,
-  },
-  modalDetailValue: {
-    fontSize: 14,
-    color: '#333',
-    fontWeight: '500',
-    flex: 1,
-  },
-  joinOptions: {
-    marginBottom: 20,
-  },
-  joinOptionsTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 12,
-  },
-  joinOptionButton: {
-    borderWidth: 2,
-    borderColor: '#e1e5e9',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-  },
-  selectedJoinOption: {
-    borderColor: '#007AFF',
-    backgroundColor: '#F0F8FF',
-  },
-  joinOptionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
-  },
-  joinOptionDescription: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 18,
-  },
-  modalFooter: {
-    padding: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#e1e5e9',
-  },
-  modalJoinButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  modalJoinButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  alreadyRegisteredText: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    fontStyle: 'italic',
-  },
-  registrationClosedText: {
-    fontSize: 16,
-    color: '#FF3B30',
-    textAlign: 'center',
-    fontWeight: '600',
-  },
-});
 
 export default JoinLeaguesScreen;

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   RefreshControl,
@@ -13,6 +12,18 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { DataStore } from '../services/DataStore';
 import { Game, Team, User, Poll, League } from '../types';
+import {
+  globalStyles,
+  cardStyles,
+  headerStyles,
+  textStyles,
+  buttonStyles,
+  statusStyles,
+  colors,
+  spacing,
+  typography,
+  borderRadius
+} from '../styles';
 
 const GameDetailScreen = ({ route, navigation }: any) => {
   const { gameId, teamId } = route.params;
@@ -157,31 +168,31 @@ const GameDetailScreen = ({ route, navigation }: any) => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Scheduled': return '#007AFF';
-      case 'In Progress': return '#FF9500';
-      case 'Completed': return '#34C759';
-      case 'Cancelled': return '#FF3B30';
-      default: return '#666';
+      case 'Scheduled': return colors.status.scheduled;
+      case 'In Progress': return colors.status.inProgress;
+      case 'Completed': return colors.status.completed;
+      case 'Cancelled': return colors.status.cancelled;
+      default: return colors.text.secondary;
     }
   };
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading game details...</Text>
+      <View style={globalStyles.loadingContainer}>
+        <Text style={globalStyles.loadingText}>Loading game details...</Text>
       </View>
     );
   }
 
   if (!game || !homeTeam || !awayTeam) {
     return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Game not found</Text>
+      <View style={globalStyles.errorContainer}>
+        <Text style={globalStyles.errorText}>Game not found</Text>
         <TouchableOpacity
-          style={styles.backButton}
+          style={buttonStyles.primary}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.backButtonText}>Go Back</Text>
+          <Text style={buttonStyles.primaryText}>Go Back</Text>
         </TouchableOpacity>
       </View>
     );
@@ -193,84 +204,84 @@ const GameDetailScreen = ({ route, navigation }: any) => {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={globalStyles.container}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
       {/* Game Header */}
-      <View style={styles.gameHeader}>
-        <View style={styles.statusContainer}>
-          <View style={[styles.statusBadge, { backgroundColor: getStatusColor(game.status) }]}>
-            <Text style={styles.statusText}>{game.status}</Text>
+      <View style={{backgroundColor: colors.background.card, padding: spacing.xl, marginBottom: spacing.xl}}>
+        <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.xl}}>
+          <View style={[statusStyles.badge, { backgroundColor: getStatusColor(game.status) }]}>
+            <Text style={statusStyles.badgeText}>{game.status}</Text>
           </View>
-          <Text style={styles.weekText}>Week {game.week}</Text>
+          <Text style={[textStyles.caption, {fontWeight: typography.weight.medium}]}>Week {game.week}</Text>
         </View>
         
-        <View style={styles.matchup}>
-          <View style={styles.teamContainer}>
-            <Text style={[styles.teamName, game.homeTeam === userTeamId && styles.userTeamName]}>
+        <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+          <View style={{flex: 1, alignItems: 'center'}}>
+            <Text style={[textStyles.title, {fontSize: typography.size.lg, textAlign: 'center', marginBottom: spacing.xs}, game.homeTeam === userTeamId && {color: colors.primary}]}>
               {homeTeam.name}
             </Text>
-            <Text style={styles.teamLabel}>HOME</Text>
+            <Text style={[textStyles.small, {fontWeight: typography.weight.medium}]}>HOME</Text>
           </View>
           
-          <View style={styles.scoreSection}>
+          <View style={{paddingHorizontal: spacing.xl}}>
             {game.homeScore !== undefined && game.awayScore !== undefined ? (
-              <Text style={styles.finalScore}>
+              <Text style={[textStyles.title, {fontSize: 36, color: colors.primary, textAlign: 'center'}]}>
                 {game.homeScore} - {game.awayScore}
               </Text>
             ) : (
-              <Text style={styles.vsText}>VS</Text>
+              <Text style={[textStyles.title, {fontSize: 24, color: colors.text.secondary, textAlign: 'center'}]}>VS</Text>
             )}
           </View>
           
-          <View style={styles.teamContainer}>
-            <Text style={[styles.teamName, game.awayTeam === userTeamId && styles.userTeamName]}>
+          <View style={{flex: 1, alignItems: 'center'}}>
+            <Text style={[textStyles.title, {fontSize: typography.size.lg, textAlign: 'center', marginBottom: spacing.xs}, game.awayTeam === userTeamId && {color: colors.primary}]}>
               {awayTeam.name}
             </Text>
-            <Text style={styles.teamLabel}>AWAY</Text>
+            <Text style={[textStyles.small, {fontWeight: typography.weight.medium}]}>AWAY</Text>
           </View>
         </View>
       </View>
 
       {/* Game Information */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Game Information</Text>
+      <View style={{backgroundColor: colors.background.card, marginBottom: spacing.xl, padding: spacing.xl}}>
+        <Text style={[textStyles.title, {fontSize: typography.size.xl, marginBottom: spacing.lg}]}>Game Information</Text>
         
-        <View style={styles.infoGrid}>
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>📅 Date & Time</Text>
-            <Text style={styles.infoValue}>
+        <View style={{marginBottom: spacing.xl}}>
+          <View style={{marginBottom: spacing.md}}>
+            <Text style={[textStyles.caption, {marginBottom: spacing.xs}]}>📅 Date & Time</Text>
+            <Text style={[textStyles.body, {fontWeight: typography.weight.medium}]}>
               {formatDateTime(game.date, game.time)}
             </Text>
           </View>
           
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>📍 Location</Text>
-            <Text style={styles.infoValue}>{game.location}</Text>
+          <View style={{marginBottom: spacing.md}}>
+            <Text style={[textStyles.caption, {marginBottom: spacing.xs}]}>📍 Location</Text>
+            <Text style={[textStyles.body, {fontWeight: typography.weight.medium}]}>{game.location}</Text>
           </View>
           
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>🏆 League</Text>
-            <Text style={styles.infoValue}>{league?.name || 'Unknown League'}</Text>
+          <View style={{marginBottom: spacing.md}}>
+            <Text style={[textStyles.caption, {marginBottom: spacing.xs}]}>🏆 League</Text>
+            <Text style={[textStyles.body, {fontWeight: typography.weight.medium}]}>{league?.name || 'Unknown League'}</Text>
           </View>
           
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>⚽ Week</Text>
-            <Text style={styles.infoValue}>Week {game.week}</Text>
+          <View style={{marginBottom: spacing.md}}>
+            <Text style={[textStyles.caption, {marginBottom: spacing.xs}]}>⚽ Week</Text>
+            <Text style={[textStyles.body, {fontWeight: typography.weight.medium}]}>Week {game.week}</Text>
           </View>
         </View>
         
-        <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
-          <Text style={styles.shareButtonText}>📤 Share Game</Text>
+        <TouchableOpacity style={[buttonStyles.primary, {alignItems: 'center'}]} onPress={handleShare}>
+          <Text style={buttonStyles.primaryText}>📤 Share Game</Text>
         </TouchableOpacity>
       </View>
 
       {/* Attendance Poll - Only show for user's team games */}
       {isUserTeamGame && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Attendance Poll</Text>
+        <View style={{backgroundColor: colors.background.card, marginBottom: spacing.xl, padding: spacing.xl}}>
+          <Text style={[textStyles.title, {fontSize: typography.size.xl, marginBottom: spacing.lg}]}>Attendance Poll</Text>
           
           {game.status === 'Scheduled' ? (
             <>
@@ -365,8 +376,8 @@ const GameDetailScreen = ({ route, navigation }: any) => {
       )}
 
       {/* Quick Actions */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
+      <View style={{backgroundColor: colors.background.card, marginBottom: spacing.xl, padding: spacing.xl}}>
+        <Text style={[textStyles.title, {fontSize: typography.size.xl, marginBottom: spacing.lg}]}>Quick Actions</Text>
         
         <TouchableOpacity 
           style={styles.actionButton}

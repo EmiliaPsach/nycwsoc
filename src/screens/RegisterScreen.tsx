@@ -4,7 +4,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   Alert,
   ScrollView,
   KeyboardAvoidingView,
@@ -12,6 +11,14 @@ import {
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useAuth } from '../context/AuthContext';
+import { 
+  globalStyles, 
+  buttonStyles, 
+  formStyles, 
+  textStyles,
+  colors,
+  spacing 
+} from '../styles';
 
 const RegisterScreen = ({ navigation }: any) => {
   const [formData, setFormData] = useState({
@@ -89,20 +96,20 @@ const RegisterScreen = ({ navigation }: any) => {
 
   return (
     <KeyboardAvoidingView 
-      style={styles.container} 
+      style={globalStyles.container} 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Create Account</Text>
-          <Text style={styles.subtitle}>Join the soccer community!</Text>
+      <ScrollView contentContainerStyle={globalStyles.scrollContainer}>
+        <View style={{alignItems: 'center', marginBottom: spacing.xxxl}}>
+          <Text style={[textStyles.title, {color: colors.primary, marginBottom: spacing.sm}]}>Create Account</Text>
+          <Text style={textStyles.subtitle}>Join the soccer community!</Text>
         </View>
 
-        <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Full Name *</Text>
+        <View style={formStyles.form}>
+          <View style={formStyles.inputContainer}>
+            <Text style={formStyles.label}>Full Name *</Text>
             <TextInput
-              style={styles.input}
+              style={formStyles.input}
               value={formData.name}
               onChangeText={(value) => handleInputChange('name', value)}
               placeholder="Enter your full name"
@@ -110,10 +117,10 @@ const RegisterScreen = ({ navigation }: any) => {
             />
           </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email *</Text>
+          <View style={formStyles.inputContainer}>
+            <Text style={formStyles.label}>Email *</Text>
             <TextInput
-              style={styles.input}
+              style={formStyles.input}
               value={formData.email}
               onChangeText={(value) => handleInputChange('email', value)}
               placeholder="Enter your email"
@@ -123,10 +130,10 @@ const RegisterScreen = ({ navigation }: any) => {
             />
           </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Password *</Text>
+          <View style={formStyles.inputContainer}>
+            <Text style={formStyles.label}>Password *</Text>
             <TextInput
-              style={styles.input}
+              style={formStyles.input}
               value={formData.password}
               onChangeText={(value) => handleInputChange('password', value)}
               placeholder="Enter your password"
@@ -135,10 +142,10 @@ const RegisterScreen = ({ navigation }: any) => {
             />
           </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Confirm Password *</Text>
+          <View style={formStyles.inputContainer}>
+            <Text style={formStyles.label}>Confirm Password *</Text>
             <TextInput
-              style={styles.input}
+              style={formStyles.input}
               value={formData.confirmPassword}
               onChangeText={(value) => handleInputChange('confirmPassword', value)}
               placeholder="Confirm your password"
@@ -147,10 +154,10 @@ const RegisterScreen = ({ navigation }: any) => {
             />
           </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Zip Code</Text>
+          <View style={formStyles.inputContainer}>
+            <Text style={formStyles.label}>Zip Code</Text>
             <TextInput
-              style={styles.input}
+              style={formStyles.input}
               value={formData.zipCode}
               onChangeText={(value) => handleInputChange('zipCode', value)}
               placeholder="Enter your zip code"
@@ -159,10 +166,10 @@ const RegisterScreen = ({ navigation }: any) => {
             />
           </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Phone Number</Text>
+          <View style={formStyles.inputContainer}>
+            <Text style={formStyles.label}>Phone Number</Text>
             <TextInput
-              style={styles.input}
+              style={formStyles.input}
               value={formData.phoneNumber}
               onChangeText={(value) => handleInputChange('phoneNumber', value)}
               placeholder="Enter your phone number"
@@ -170,13 +177,13 @@ const RegisterScreen = ({ navigation }: any) => {
             />
           </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Jersey Size</Text>
-            <View style={styles.pickerContainer}>
+          <View style={formStyles.inputContainer}>
+            <Text style={formStyles.label}>Jersey Size</Text>
+            <View style={formStyles.pickerContainer}>
               <Picker
                 selectedValue={formData.jerseySize}
                 onValueChange={(value) => handleInputChange('jerseySize', value)}
-                style={styles.picker}
+                style={{height: 50}}
               >
                 <Picker.Item label="XS" value="XS" />
                 <Picker.Item label="S" value="S" />
@@ -188,13 +195,13 @@ const RegisterScreen = ({ navigation }: any) => {
             </View>
           </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Gender</Text>
-            <View style={styles.pickerContainer}>
+          <View style={formStyles.inputContainer}>
+            <Text style={formStyles.label}>Gender</Text>
+            <View style={formStyles.pickerContainer}>
               <Picker
                 selectedValue={formData.gender}
                 onValueChange={(value) => handleInputChange('gender', value)}
-                style={styles.picker}
+                style={{height: 50}}
               >
                 <Picker.Item label="Woman" value="Woman" />
                 <Picker.Item label="Non-binary" value="Non-binary" />
@@ -203,13 +210,13 @@ const RegisterScreen = ({ navigation }: any) => {
             </View>
           </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Skill Level</Text>
-            <View style={styles.pickerContainer}>
+          <View style={formStyles.inputContainer}>
+            <Text style={formStyles.label}>Skill Level</Text>
+            <View style={formStyles.pickerContainer}>
               <Picker
                 selectedValue={formData.skillLevel}
                 onValueChange={(value) => handleInputChange('skillLevel', value)}
-                style={styles.picker}
+                style={{height: 50}}
               >
                 <Picker.Item label="Beginner" value="Beginner" />
                 <Picker.Item label="Intermediate" value="Intermediate" />
@@ -219,20 +226,20 @@ const RegisterScreen = ({ navigation }: any) => {
           </View>
 
           <TouchableOpacity 
-            style={[styles.button, loading && styles.buttonDisabled]} 
+            style={[buttonStyles.primary, loading && buttonStyles.disabled, {marginTop: spacing.xl}]} 
             onPress={handleRegister}
             disabled={loading}
           >
-            <Text style={styles.buttonText}>
+            <Text style={buttonStyles.primaryText}>
               {loading ? 'Creating Account...' : 'Create Account'}
             </Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Already have an account?</Text>
+        <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingBottom: spacing.xl}}>
+          <Text style={[textStyles.body, {color: colors.text.secondary, marginRight: spacing.sm}]}>Already have an account?</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-            <Text style={styles.linkText}>Sign In</Text>
+            <Text style={textStyles.link}>Sign In</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -240,90 +247,5 @@ const RegisterScreen = ({ navigation }: any) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    padding: 20,
-    paddingTop: 40,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#007AFF',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-  },
-  form: {
-    marginBottom: 20,
-  },
-  inputContainer: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: '#fff',
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    backgroundColor: '#fff',
-  },
-  picker: {
-    height: 50,
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    borderRadius: 8,
-    padding: 16,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  buttonDisabled: {
-    opacity: 0.7,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingBottom: 20,
-  },
-  footerText: {
-    fontSize: 16,
-    color: '#666',
-    marginRight: 8,
-  },
-  linkText: {
-    fontSize: 16,
-    color: '#007AFF',
-    fontWeight: '600',
-  },
-});
 
 export default RegisterScreen;

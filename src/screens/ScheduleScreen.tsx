@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   RefreshControl,
@@ -14,6 +13,17 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { DataStore } from '../services/DataStore';
 import { Game, Team } from '../types';
+import {
+  globalStyles,
+  cardStyles,
+  headerStyles,
+  textStyles,
+  buttonStyles,
+  colors,
+  spacing,
+  typography,
+  statusStyles
+} from '../styles';
 
 const { width } = Dimensions.get('window');
 
@@ -83,11 +93,11 @@ const ScheduleScreen = ({ navigation }: any) => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Scheduled': return '#007AFF';
-      case 'In Progress': return '#FF9500';
-      case 'Completed': return '#34C759';
-      case 'Cancelled': return '#FF3B30';
-      default: return '#666';
+      case 'Scheduled': return colors.status.scheduled;
+      case 'In Progress': return colors.status.inProgress;
+      case 'Completed': return colors.status.completed;
+      case 'Cancelled': return colors.status.cancelled;
+      default: return colors.text.secondary;
     }
   };
 
@@ -121,40 +131,40 @@ const ScheduleScreen = ({ navigation }: any) => {
 
     return (
       <TouchableOpacity 
-        style={styles.gameCard}
+        style={cardStyles.card}
         onPress={() => navigation.navigate('GameDetail', { gameId: game.id })}
       >
-        <View style={styles.gameHeader}>
-          <View style={styles.gameStatus}>
-            <Text style={styles.statusIcon}>{getStatusIcon(game.status)}</Text>
-            <Text style={[styles.statusText, { color: getStatusColor(game.status) }]}>
+        <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md}}>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Text style={{marginRight: spacing.xs, fontSize: typography.size.md}}>{getStatusIcon(game.status)}</Text>
+            <Text style={[{fontSize: typography.size.sm, fontWeight: typography.weight.semiBold}, { color: getStatusColor(game.status) }]}>
               {game.status}
             </Text>
           </View>
-          <Text style={styles.gameWeek}>Week {game.week}</Text>
+          <Text style={[textStyles.small, {fontWeight: typography.weight.medium}]}>Week {game.week}</Text>
         </View>
 
-        <View style={styles.gameInfo}>
-          <View style={styles.teamsContainer}>
-            <Text style={[styles.teamName, isUserTeam(game.homeTeam) && styles.userTeam]}>
+        <View style={{flex: 1}}>
+          <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm}}>
+            <Text style={[{fontSize: typography.size.md, fontWeight: typography.weight.semiBold, color: colors.text.primary, flex: 1, textAlign: 'center'}, isUserTeam(game.homeTeam) && {color: colors.primary, fontWeight: typography.weight.bold}]}>
               {homeTeamName}
             </Text>
-            <View style={styles.scoreContainer}>
+            <View style={{marginHorizontal: spacing.sm}}>
               {game.homeScore !== undefined && game.awayScore !== undefined ? (
-                <Text style={styles.score}>
+                <Text style={{fontSize: typography.size.lg, fontWeight: typography.weight.bold, color: colors.primary}}>
                   {game.homeScore} - {game.awayScore}
                 </Text>
               ) : (
-                <Text style={styles.vs}>vs</Text>
+                <Text style={textStyles.caption}>vs</Text>
               )}
             </View>
-            <Text style={[styles.teamName, isUserTeam(game.awayTeam) && styles.userTeam]}>
+            <Text style={[{fontSize: typography.size.md, fontWeight: typography.weight.semiBold, color: colors.text.primary, flex: 1, textAlign: 'center'}, isUserTeam(game.awayTeam) && {color: colors.primary, fontWeight: typography.weight.bold}]}>
               {awayTeamName}
             </Text>
           </View>
           
-          <Text style={styles.gameTime}>{formatGameDate(game.date, game.time)}</Text>
-          <Text style={styles.gameLocation}>📍 {game.location}</Text>
+          <Text style={[{fontSize: typography.size.md, color: colors.primary, fontWeight: typography.weight.semiBold, marginBottom: spacing.xs}]}>{formatGameDate(game.date, game.time)}</Text>
+          <Text style={textStyles.caption}>📍 {game.location}</Text>
         </View>
       </TouchableOpacity>
     );
@@ -175,8 +185,8 @@ const ScheduleScreen = ({ navigation }: any) => {
       const dateGames = gamesByDate[dateKey];
       
       return (
-        <View key={dateKey} style={styles.dateSection}>
-          <Text style={styles.dateHeader}>
+        <View key={dateKey} style={{marginBottom: spacing.xl}}>
+          <Text style={[headerStyles.sectionTitle, {marginLeft: spacing.xl, marginRight: spacing.xl, marginBottom: spacing.sm, marginTop: spacing.sm, fontSize: typography.size.lg, fontWeight: typography.weight.semiBold}]}>
             {date.toLocaleDateString('en-US', { 
               weekday: 'long', 
               month: 'long', 
@@ -193,54 +203,54 @@ const ScheduleScreen = ({ navigation }: any) => {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading schedule...</Text>
+      <View style={globalStyles.loadingContainer}>
+        <Text style={globalStyles.loadingText}>Loading schedule...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Schedule</Text>
-        <View style={styles.statsContainer}>
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{games.length}</Text>
-            <Text style={styles.statLabel}>Total Games</Text>
+    <View style={globalStyles.container}>
+      <View style={headerStyles.header}>
+        <Text style={headerStyles.headerTitle}>Schedule</Text>
+        <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
+          <View style={{alignItems: 'center'}}>
+            <Text style={[{fontSize: typography.size.xxl, fontWeight: typography.weight.bold, color: colors.primary}]}>{games.length}</Text>
+            <Text style={[textStyles.small, {marginTop: 2}]}>Total Games</Text>
           </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>
+          <View style={{alignItems: 'center'}}>
+            <Text style={[{fontSize: typography.size.xxl, fontWeight: typography.weight.bold, color: colors.primary}]}>
               {games.filter(g => g.status === 'Scheduled').length}
             </Text>
-            <Text style={styles.statLabel}>Upcoming</Text>
+            <Text style={[textStyles.small, {marginTop: 2}]}>Upcoming</Text>
           </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>
+          <View style={{alignItems: 'center'}}>
+            <Text style={[{fontSize: typography.size.xxl, fontWeight: typography.weight.bold, color: colors.primary}]}>
               {games.filter(g => g.status === 'Completed').length}
             </Text>
-            <Text style={styles.statLabel}>Played</Text>
+            <Text style={[textStyles.small, {marginTop: 2}]}>Played</Text>
           </View>
         </View>
       </View>
 
       <ScrollView
-        style={styles.content}
+        style={{flex: 1}}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
         {games.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>📅</Text>
-            <Text style={styles.emptyTitle}>No Games Scheduled</Text>
-            <Text style={styles.emptyText}>
+          <View style={globalStyles.emptyState}>
+            <Text style={{fontSize: 64, marginBottom: spacing.lg}}>📅</Text>
+            <Text style={[textStyles.title, {marginBottom: spacing.sm, fontSize: typography.size.xl}]}>No Games Scheduled</Text>
+            <Text style={[globalStyles.emptyText, {lineHeight: typography.size.md * typography.lineHeight.relaxed}]}>
               Join a league to start playing games!
             </Text>
             <TouchableOpacity 
-              style={styles.emptyButton}
+              style={[buttonStyles.primary, {paddingHorizontal: spacing.xxl, paddingVertical: spacing.md}]}
               onPress={() => navigation.navigate('Leagues')}
             >
-              <Text style={styles.emptyButtonText}>Join a League</Text>
+              <Text style={buttonStyles.primaryText}>Join a League</Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -251,175 +261,5 @@ const ScheduleScreen = ({ navigation }: any) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 18,
-    color: '#666',
-  },
-  header: {
-    backgroundColor: '#fff',
-    paddingTop: 50,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e1e5e9',
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 15,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#007AFF',
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 2,
-  },
-  content: {
-    flex: 1,
-  },
-  dateSection: {
-    marginBottom: 20,
-  },
-  dateHeader: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginLeft: 20,
-    marginRight: 20,
-    marginBottom: 10,
-    marginTop: 10,
-  },
-  gameCard: {
-    backgroundColor: '#fff',
-    marginHorizontal: 20,
-    marginBottom: 12,
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  gameHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  gameStatus: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  statusIcon: {
-    marginRight: 6,
-    fontSize: 16,
-  },
-  statusText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  gameWeek: {
-    fontSize: 12,
-    color: '#666',
-    fontWeight: '500',
-  },
-  gameInfo: {
-    flex: 1,
-  },
-  teamsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  teamName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    flex: 1,
-    textAlign: 'center',
-  },
-  userTeam: {
-    color: '#007AFF',
-    fontWeight: 'bold',
-  },
-  scoreContainer: {
-    marginHorizontal: 10,
-  },
-  score: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#007AFF',
-  },
-  vs: {
-    fontSize: 14,
-    color: '#666',
-  },
-  gameTime: {
-    fontSize: 16,
-    color: '#007AFF',
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  gameLocation: {
-    fontSize: 14,
-    color: '#666',
-  },
-  emptyState: {
-    alignItems: 'center',
-    padding: 60,
-    marginTop: 60,
-  },
-  emptyIcon: {
-    fontSize: 64,
-    marginBottom: 16,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 20,
-    lineHeight: 22,
-  },
-  emptyButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 10,
-  },
-  emptyButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-});
 
 export default ScheduleScreen;

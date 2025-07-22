@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   RefreshControl,
@@ -12,6 +11,15 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { DataStore } from '../services/DataStore';
 import { Team, Game, League } from '../types';
+import {
+  globalStyles,
+  buttonStyles,
+  cardStyles,
+  headerStyles,
+  textStyles,
+  colors,
+  spacing,
+} from '../styles';
 
 const HomeScreen = ({ navigation }: any) => {
   const { user } = useAuth();
@@ -101,21 +109,60 @@ const HomeScreen = ({ navigation }: any) => {
 
     return (
       <TouchableOpacity 
-        style={styles.gameCard}
+        style={cardStyles.card}
         onPress={() => navigation.navigate('GameDetail', { gameId: game.id })}
       >
-        <View style={styles.gameInfo}>
-          <View style={styles.teamsContainer}>
-            <Text style={[styles.teamName, isUserTeam(game.homeTeam) && styles.userTeam]}>
+        <View style={{ flex: 1 }}>
+          <View style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: spacing.sm,
+          }}>
+            <Text style={[
+              {
+                fontSize: 16,
+                fontWeight: '600',
+                color: colors.text.primary,
+                flex: 1,
+                textAlign: 'center',
+              },
+              isUserTeam(game.homeTeam) && {
+                color: colors.primary,
+                fontWeight: 'bold',
+              }
+            ]}>
               {homeTeamName}
             </Text>
-            <Text style={styles.vs}>vs</Text>
-            <Text style={[styles.teamName, isUserTeam(game.awayTeam) && styles.userTeam]}>
+            <Text style={{
+              fontSize: 14,
+              color: colors.text.secondary,
+              marginHorizontal: spacing.sm,
+            }}>vs</Text>
+            <Text style={[
+              {
+                fontSize: 16,
+                fontWeight: '600',
+                color: colors.text.primary,
+                flex: 1,
+                textAlign: 'center',
+              },
+              isUserTeam(game.awayTeam) && {
+                color: colors.primary,
+                fontWeight: 'bold',
+              }
+            ]}>
               {awayTeamName}
             </Text>
           </View>
-          <Text style={styles.gameTime}>{formatGameDate(game.date, game.time)}</Text>
-          <Text style={styles.gameLocation}>{game.location}</Text>
+          <Text style={[
+            textStyles.body,
+            {
+              color: colors.primary,
+              fontWeight: '600',
+              marginBottom: spacing.xs,
+            }
+          ]}>{formatGameDate(game.date, game.time)}</Text>
+          <Text style={textStyles.caption}>{game.location}</Text>
         </View>
       </TouchableOpacity>
     );
@@ -123,15 +170,34 @@ const HomeScreen = ({ navigation }: any) => {
 
   const TeamCard = ({ team }: { team: Team }) => (
     <TouchableOpacity 
-      style={styles.teamCard}
+      style={cardStyles.card}
       onPress={() => navigation.navigate('TeamDetail', { teamId: team.id })}
     >
-      <Text style={styles.teamCardName}>{team.name}</Text>
-      <Text style={styles.teamDescription}>{team.description}</Text>
-      <View style={styles.teamStats}>
-        <Text style={styles.teamStat}>{team.players.length} players</Text>
-        <Text style={styles.teamStat}>•</Text>
-        <Text style={styles.teamStat}>
+      <Text style={[
+        textStyles.body,
+        {
+          fontSize: 18,
+          fontWeight: 'bold',
+          marginBottom: spacing.xs,
+        }
+      ]}>{team.name}</Text>
+      <Text style={[
+        textStyles.caption,
+        { marginBottom: spacing.sm }
+      ]}>{team.description}</Text>
+      <View style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+      }}>
+        <Text style={[
+          textStyles.small,
+          { marginRight: spacing.sm }
+        ]}>{team.players.length} players</Text>
+        <Text style={[
+          textStyles.small,
+          { marginRight: spacing.sm }
+        ]}>•</Text>
+        <Text style={textStyles.small}>
           {team.captain === user?.id ? 'Captain' : 'Member'}
         </Text>
       </View>
@@ -140,53 +206,73 @@ const HomeScreen = ({ navigation }: any) => {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading...</Text>
+      <View style={globalStyles.loadingContainer}>
+        <Text style={globalStyles.loadingText}>Loading...</Text>
       </View>
     );
   }
 
   return (
     <ScrollView 
-      style={styles.container}
+      style={globalStyles.container}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      <View style={styles.header}>
-        <Text style={styles.welcome}>Welcome back,</Text>
-        <Text style={styles.userName}>{user?.name}! ⚽</Text>
+      <View style={headerStyles.welcomeHeader}>
+        <Text style={headerStyles.welcomeText}>Welcome back,</Text>
+        <Text style={headerStyles.welcomeUserName}>{user?.name}! ⚽</Text>
       </View>
 
       {/* Quick Stats */}
-      <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{teams.length}</Text>
-          <Text style={styles.statLabel}>Teams</Text>
+      <View style={{
+        flexDirection: 'row',
+        paddingHorizontal: spacing.xl,
+        marginBottom: spacing.xl,
+      }}>
+        <View style={cardStyles.statCard}>
+          <Text style={{
+            fontSize: 32,
+            fontWeight: 'bold',
+            color: colors.primary,
+          }}>{teams.length}</Text>
+          <Text style={{
+            fontSize: 14,
+            color: colors.text.secondary,
+            marginTop: spacing.xs,
+          }}>Teams</Text>
         </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{upcomingGames.length}</Text>
-          <Text style={styles.statLabel}>Upcoming Games</Text>
+        <View style={cardStyles.statCard}>
+          <Text style={{
+            fontSize: 32,
+            fontWeight: 'bold',
+            color: colors.primary,
+          }}>{upcomingGames.length}</Text>
+          <Text style={{
+            fontSize: 14,
+            color: colors.text.secondary,
+            marginTop: spacing.xs,
+          }}>Upcoming Games</Text>
         </View>
       </View>
 
       {/* Upcoming Games */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Upcoming Games</Text>
+      <View style={{ marginBottom: spacing.xxxl }}>
+        <View style={headerStyles.sectionHeader}>
+          <Text style={headerStyles.sectionTitle}>Upcoming Games</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Schedule')}>
-            <Text style={styles.seeAll}>See All</Text>
+            <Text style={headerStyles.sectionAction}>See All</Text>
           </TouchableOpacity>
         </View>
 
         {upcomingGames.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>No upcoming games</Text>
+          <View style={globalStyles.emptyState}>
+            <Text style={globalStyles.emptyText}>No upcoming games</Text>
             <TouchableOpacity 
-              style={styles.emptyButton}
+              style={buttonStyles.primary}
               onPress={() => navigation.navigate('Leagues')}
             >
-              <Text style={styles.emptyButtonText}>Join a League</Text>
+              <Text style={buttonStyles.primaryText}>Join a League</Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -197,19 +283,19 @@ const HomeScreen = ({ navigation }: any) => {
       </View>
 
       {/* My Teams */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>My Teams</Text>
+      <View style={{ marginBottom: spacing.xxxl }}>
+        <View style={headerStyles.sectionHeader}>
+          <Text style={headerStyles.sectionTitle}>My Teams</Text>
         </View>
 
         {teams.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>You're not on any teams yet</Text>
+          <View style={globalStyles.emptyState}>
+            <Text style={globalStyles.emptyText}>You're not on any teams yet</Text>
             <TouchableOpacity 
-              style={styles.emptyButton}
+              style={buttonStyles.primary}
               onPress={() => navigation.navigate('Leagues')}
             >
-              <Text style={styles.emptyButtonText}>Find a Team</Text>
+              <Text style={buttonStyles.primaryText}>Find a Team</Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -220,31 +306,81 @@ const HomeScreen = ({ navigation }: any) => {
       </View>
 
       {/* Quick Actions */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
-        <View style={styles.actionsGrid}>
+      <View style={{ marginBottom: spacing.xxxl }}>
+        <Text style={[headerStyles.sectionTitle, { paddingHorizontal: spacing.xl }]}>Quick Actions</Text>
+        <View style={{
+          flexDirection: 'row',
+          justifyContent: 'space-around',
+          paddingHorizontal: spacing.xl,
+          marginTop: spacing.sm,
+        }}>
           <TouchableOpacity 
-            style={styles.actionCard}
+            style={[
+              cardStyles.compactCard,
+              {
+                alignItems: 'center',
+                width: 100,
+                marginHorizontal: 0,
+                marginBottom: 0,
+              }
+            ]}
             onPress={() => navigation.navigate('Schedule')}
           >
-            <Text style={styles.actionIcon}>📅</Text>
-            <Text style={styles.actionText}>View Schedule</Text>
+            <Text style={{ fontSize: 28, marginBottom: spacing.xs }}>📅</Text>
+            <Text style={[
+              textStyles.caption,
+              {
+                fontWeight: '600',
+                textAlign: 'center',
+                color: colors.text.primary,
+              }
+            ]}>View Schedule</Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
-            style={styles.actionCard}
+            style={[
+              cardStyles.compactCard,
+              {
+                alignItems: 'center',
+                width: 100,
+                marginHorizontal: 0,
+                marginBottom: 0,
+              }
+            ]}
             onPress={() => navigation.navigate('Leagues')}
           >
-            <Text style={styles.actionIcon}>⚽</Text>
-            <Text style={styles.actionText}>Join League</Text>
+            <Text style={{ fontSize: 28, marginBottom: spacing.xs }}>⚽</Text>
+            <Text style={[
+              textStyles.caption,
+              {
+                fontWeight: '600',
+                textAlign: 'center',
+                color: colors.text.primary,
+              }
+            ]}>Join League</Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
-            style={styles.actionCard}
+            style={[
+              cardStyles.compactCard,
+              {
+                alignItems: 'center',
+                width: 100,
+                marginHorizontal: 0,
+                marginBottom: 0,
+              }
+            ]}
             onPress={() => navigation.navigate('Profile')}
           >
-            <Text style={styles.actionIcon}>👤</Text>
-            <Text style={styles.actionText}>Edit Profile</Text>
+            <Text style={{ fontSize: 28, marginBottom: spacing.xs }}>👤</Text>
+            <Text style={[
+              textStyles.caption,
+              {
+                fontWeight: '600',
+                textAlign: 'center',
+                color: colors.text.primary,
+              }
+            ]}>Edit Profile</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -252,207 +388,5 @@ const HomeScreen = ({ navigation }: any) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 18,
-    color: '#666',
-  },
-  header: {
-    padding: 20,
-    paddingTop: 40,
-  },
-  welcome: {
-    fontSize: 20,
-    color: '#666',
-  },
-  userName: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 12,
-    marginRight: 10,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  statNumber: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#007AFF',
-  },
-  statLabel: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
-  },
-  section: {
-    marginBottom: 30,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    marginBottom: 15,
-  },
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  seeAll: {
-    fontSize: 16,
-    color: '#007AFF',
-    fontWeight: '600',
-  },
-  gameCard: {
-    backgroundColor: '#fff',
-    marginHorizontal: 20,
-    marginBottom: 12,
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  gameInfo: {
-    flex: 1,
-  },
-  teamsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  teamName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    flex: 1,
-    textAlign: 'center',
-  },
-  userTeam: {
-    color: '#007AFF',
-    fontWeight: 'bold',
-  },
-  vs: {
-    fontSize: 14,
-    color: '#666',
-    marginHorizontal: 10,
-  },
-  gameTime: {
-    fontSize: 16,
-    color: '#007AFF',
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  gameLocation: {
-    fontSize: 14,
-    color: '#666',
-  },
-  teamCard: {
-    backgroundColor: '#fff',
-    marginHorizontal: 20,
-    marginBottom: 12,
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  teamCardName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
-  },
-  teamDescription: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
-  },
-  teamStats: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  teamStat: {
-    fontSize: 12,
-    color: '#999',
-    marginRight: 8,
-  },
-  emptyState: {
-    alignItems: 'center',
-    padding: 40,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 16,
-  },
-  emptyButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  emptyButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  actionsGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingHorizontal: 20,
-    marginTop: 10,
-  },
-  actionCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    width: 100,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  actionIcon: {
-    fontSize: 28,
-    marginBottom: 6,
-  },
-  actionText: {
-    fontSize: 14,
-    color: '#333',
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-});
 
 export default HomeScreen;
