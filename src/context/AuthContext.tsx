@@ -5,6 +5,7 @@ import { DataStore } from '../services/DataStore';
 
 interface AuthContextType {
   user: User | null;
+  setUser: (user: User | null) => void;
   login: (email: string, password: string) => Promise<boolean>;
   register: (userData: Partial<User> & { email: string; password: string; name: string }) => Promise<boolean>;
   logout: () => Promise<void>;
@@ -104,8 +105,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{
+    <AuthContext.Provider
+    value={{
       user,
+      setUser,
       login,
       register,
       logout,
