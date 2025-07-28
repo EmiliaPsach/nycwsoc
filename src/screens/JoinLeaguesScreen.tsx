@@ -41,11 +41,15 @@ const JoinLeaguesScreen = ({ navigation }: any) => {
   const [registrations, setRegistrations] = useState<FreeAgentRegistration[]>([]);
   
   // Filter states
-  const [searchText, setSearchText] = useState('');
-  const [locationFilter, setLocationFilter] = useState('');
-  const [skillFilter, setSkillFilter] = useState('');
-  const [dayFilter, setDayFilter] = useState('');
+  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
+  const [selectedSkillLevels, setSelectedSkillLevels] = useState<string[]>([]);
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+
+  // Available filter options
+  const [availableLocations, setAvailableLocations] = useState<string[]>([]);
+  const [availableSkillLevels, setAvailableSkillLevels] = useState<string[]>([]);
+  const [availableDays, setAvailableDays] = useState<string[]>([]);
 
   const dataStore = new DataStore();
 
@@ -59,6 +63,15 @@ const JoinLeaguesScreen = ({ navigation }: any) => {
       setLeagues(allLeagues);
       setFilteredLeagues(allLeagues);
       setRegistrations(userRegistrations);
+
+      // Extract unique filter options from leagues
+      const locations = [...new Set(allLeagues.map(league => league.location))].sort();
+      const skillLevels = [...new Set(allLeagues.map(league => league.skillLevel))].sort();
+      const days = [...new Set(allLeagues.map(league => league.dayOfWeek))].sort();
+
+      setAvailableLocations(locations);
+      setAvailableSkillLevels(skillLevels);
+      setAvailableDays(days);
     } catch (error) {
       console.error('Error loading leagues:', error);
       Alert.alert('Error', 'Failed to load leagues');
@@ -82,46 +95,126 @@ const JoinLeaguesScreen = ({ navigation }: any) => {
   const applyFilters = useCallback(() => {
     let filtered = leagues;
 
-    if (searchText) {
-      filtered = filtered.filter(league =>
-        league.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        league.description.toLowerCase().includes(searchText.toLowerCase())
+    if (selectedLocations.length > 0) {
+      filtered = filtered.filter(league => 
+        selectedLocations.includes(league.location)
       );
     }
 
-    if (locationFilter) {
+    if (selectedSkillLevels.length > 0) {
       filtered = filtered.filter(league =>
-        league.location.toLowerCase().includes(locationFilter.toLowerCase())
+        selectedSkillLevels.includes(league.skillLevel) || league.skillLevel === 'All Levels'
       );
     }
 
-    if (skillFilter) {
-      filtered = filtered.filter(league =>
-        league.skillLevel.toLowerCase() === skillFilter.toLowerCase() ||
-        league.skillLevel === 'All Levels'
-      );
-    }
-
-    if (dayFilter) {
-      filtered = filtered.filter(league =>
-        league.dayOfWeek.toLowerCase() === dayFilter.toLowerCase()
+    if (selectedDays.length > 0) {
+      filtered = filtered.filter(league => 
+        selectedDays.includes(league.dayOfWeek)
       );
     }
 
     setFilteredLeagues(filtered);
-  }, [leagues, searchText, locationFilter, skillFilter, dayFilter]);
+  }, [leagues, selectedLocations, selectedSkillLevels, selectedDays]);
 
   useEffect(() => {
     applyFilters();
   }, [applyFilters]);
 
   const clearFilters = () => {
-    setSearchText('');
-    setLocationFilter('');
-    setSkillFilter('');
-    setDayFilter('');
+    setSelectedLocations([]);
+    setSelectedSkillLevels([]);
+    setSelectedDays([]);
     setFilteredLeagues(leagues);
   };
+
+  const toggleFilter = (value: string, selectedValues: string[], setSelectedValues: (values: string[]) => void) => {
+    if (selectedValues.includes(value)) {
+      setSelectedValues(selectedValues.filter(v => v !== value));
+    } else {
+      setSelectedValues([...selectedValues, value]);
+    }
+  };
+
+  const CheckboxGroup = ({ 
+    title, 
+    options, 
+    selectedValues, 
+    onToggle 
+  }: {
+    title: string;
+    options: string[];
+    selectedValues: string[];
+    onToggle: (value: string) => void;
+  }) => (
+    <View style={{ marginBottom: spacing.lg }}>
+      <Text style={[textStyles.body, { 
+        fontWeight: typography.weight.semiBold, 
+        marginBottom: spacing.sm,
+        color: colors.text.primary 
+      }]}>
+        {title}
+      </Text>
+      <View style={{ 
+        flexDirection: 'row', 
+        flexWrap: 'wrap',
+        marginHorizontal: -spacing.xs 
+      }}>
+        {options.map((option, index) => {
+          const isSelected = selectedValues.includes(option);
+          return (
+            <TouchableOpacity
+              key={index}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                backgroundColor: isSelected ? colors.primary + '20' : colors.background.card,
+                borderWidth: 1,
+                borderColor: isSelected ? colors.primary : colors.border.medium,
+                borderRadius: borderRadius.sm,
+                paddingHorizontal: spacing.md,
+                paddingVertical: spacing.sm,
+                marginHorizontal: spacing.xs,
+                marginBottom: spacing.sm,
+              }}
+              onPress={() => onToggle(option)}
+            >
+              <View style={{
+                width: 16,
+                height: 16,
+                borderRadius: 3,
+                borderWidth: 2,
+                borderColor: isSelected ? colors.primary : colors.border.dark,
+                backgroundColor: isSelected ? colors.primary : 'transparent',
+                marginRight: spacing.sm,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                {isSelected && (
+                  <Text style={{ 
+                    color: colors.text.inverse, 
+                    fontSize: 10, 
+                    fontWeight: 'bold' 
+                  }}>
+                    ✓
+                  </Text>
+                )}
+              </View>
+              <Text style={[
+                textStyles.body,
+                {
+                  fontSize: typography.size.sm,
+                  color: isSelected ? colors.primary : colors.text.primary,
+                  fontWeight: isSelected ? typography.weight.medium : typography.weight.normal,
+                }
+              ]}>
+                {option}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
+  );
 
   const isRegistered = (leagueId: string) => {
     return registrations.some(reg => reg.leagueId === leagueId);
@@ -284,38 +377,49 @@ const JoinLeaguesScreen = ({ navigation }: any) => {
       </View>
 
       {showFilters && (
-        <View style={{backgroundColor: colors.background.card, padding: spacing.xl, borderBottomWidth: 1, borderBottomColor: colors.border.medium}}>
-          <TextInput
-            style={[formStyles.input, {marginBottom: spacing.md}]}
-            placeholder="Search leagues..."
-            value={searchText}
-            onChangeText={setSearchText}
+        <View style={{
+          backgroundColor: colors.background.card, 
+          padding: spacing.xl, 
+          borderBottomWidth: 1, 
+          borderBottomColor: colors.border.medium
+        }}>
+          <CheckboxGroup
+            title="Locations"
+            options={availableLocations}
+            selectedValues={selectedLocations}
+            onToggle={(value) => toggleFilter(value, selectedLocations, setSelectedLocations)}
           />
           
-          <View style={{flexDirection: 'row', justifyContent: 'space-between', marginBottom: spacing.md}}>
-            <TextInput
-              style={[formStyles.input, {width: '30%', fontSize: typography.size.sm, paddingHorizontal: spacing.sm, paddingVertical: spacing.sm}]}
-              placeholder="Location"
-              value={locationFilter}
-              onChangeText={setLocationFilter}
-            />
-            <TextInput
-              style={[formStyles.input, {width: '30%', fontSize: typography.size.sm, paddingHorizontal: spacing.sm, paddingVertical: spacing.sm}]}
-              placeholder="Skill Level"
-              value={skillFilter}
-              onChangeText={setSkillFilter}
-            />
-            <TextInput
-              style={[formStyles.input, {width: '30%', fontSize: typography.size.sm, paddingHorizontal: spacing.sm, paddingVertical: spacing.sm}]}
-              placeholder="Day of Week"
-              value={dayFilter}
-              onChangeText={setDayFilter}
-            />
-          </View>
+          <CheckboxGroup
+            title="Skill Levels"
+            options={availableSkillLevels}
+            selectedValues={selectedSkillLevels}
+            onToggle={(value) => toggleFilter(value, selectedSkillLevels, setSelectedSkillLevels)}
+          />
           
-          <TouchableOpacity style={{alignSelf: 'center', paddingVertical: spacing.sm}} onPress={clearFilters}>
-            <Text style={[textStyles.link, {fontSize: typography.size.sm}]}>Clear Filters</Text>
-          </TouchableOpacity>
+          <CheckboxGroup
+            title="Days"
+            options={availableDays}
+            selectedValues={selectedDays}
+            onToggle={(value) => toggleFilter(value, selectedDays, setSelectedDays)}
+          />
+          
+          <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+            <TouchableOpacity 
+              style={{paddingVertical: spacing.sm}} 
+              onPress={clearFilters}
+            >
+              <Text style={[textStyles.link, {fontSize: typography.size.sm}]}>Clear All Filters</Text>
+            </TouchableOpacity>
+            
+            {(selectedLocations.length > 0 || selectedSkillLevels.length > 0 || selectedDays.length > 0) && (
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <Text style={[textStyles.caption, {marginRight: spacing.sm}]}>
+                  {filteredLeagues.length} of {leagues.length} leagues
+                </Text>
+              </View>
+            )}
+          </View>
         </View>
       )}
 
@@ -330,11 +434,11 @@ const JoinLeaguesScreen = ({ navigation }: any) => {
             <Text style={{fontSize: 64, marginBottom: spacing.lg}}>⚽</Text>
             <Text style={[textStyles.title, {marginBottom: spacing.sm, fontSize: typography.size.xl}]}>No Leagues Found</Text>
             <Text style={[globalStyles.emptyText, {lineHeight: typography.size.md * typography.lineHeight.relaxed}]}>
-              {searchText || locationFilter || skillFilter || dayFilter
+              {selectedLocations.length > 0 || selectedSkillLevels.length > 0 || selectedDays.length > 0
                 ? 'Try adjusting your filters'
                 : 'Check back later for new leagues'}
             </Text>
-            {(searchText || locationFilter || skillFilter || dayFilter) && (
+            {(selectedLocations.length > 0 || selectedSkillLevels.length > 0 || selectedDays.length > 0) && (
               <TouchableOpacity style={[buttonStyles.primary, {paddingHorizontal: spacing.xxl, paddingVertical: spacing.md}]} onPress={clearFilters}>
                 <Text style={buttonStyles.primaryText}>Clear Filters</Text>
               </TouchableOpacity>
@@ -493,6 +597,5 @@ const JoinLeaguesScreen = ({ navigation }: any) => {
     </View>
   );
 };
-
 
 export default JoinLeaguesScreen;
