@@ -19,6 +19,8 @@ import {
   textStyles,
   buttonStyles,
   statusStyles,
+  pollStyles,
+  gameDetailStyles,
   colors,
   spacing,
   typography,
@@ -210,71 +212,71 @@ const GameDetailScreen = ({ route, navigation }: any) => {
       }
     >
       {/* Game Header */}
-      <View style={{backgroundColor: colors.background.card, padding: spacing.xl, marginBottom: spacing.xl}}>
-        <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.xl}}>
+      <View style={gameDetailStyles.gameHeader}>
+        <View style={gameDetailStyles.statusContainer}>
           <View style={[statusStyles.badge, { backgroundColor: getStatusColor(game.status) }]}>
             <Text style={statusStyles.badgeText}>{game.status}</Text>
           </View>
-          <Text style={[textStyles.caption, {fontWeight: typography.weight.medium}]}>Week {game.week}</Text>
+          <Text style={gameDetailStyles.weekText}>Week {game.week}</Text>
         </View>
         
-        <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
-          <View style={{flex: 1, alignItems: 'center'}}>
-            <Text style={[textStyles.title, {fontSize: typography.size.lg, textAlign: 'center', marginBottom: spacing.xs}, game.homeTeam === userTeamId && {color: colors.primary}]}>
+        <View style={gameDetailStyles.matchup}>
+          <View style={gameDetailStyles.teamContainer}>
+            <Text style={[gameDetailStyles.teamName, game.homeTeam === userTeamId && gameDetailStyles.userTeamName]}>
               {homeTeam.name}
             </Text>
-            <Text style={[textStyles.small, {fontWeight: typography.weight.medium}]}>HOME</Text>
+            <Text style={gameDetailStyles.teamLabel}>HOME</Text>
           </View>
           
-          <View style={{paddingHorizontal: spacing.xl}}>
+          <View style={gameDetailStyles.scoreSection}>
             {game.homeScore !== undefined && game.awayScore !== undefined ? (
-              <Text style={[textStyles.title, {fontSize: 36, color: colors.primary, textAlign: 'center'}]}>
+              <Text style={gameDetailStyles.finalScore}>
                 {game.homeScore} - {game.awayScore}
               </Text>
             ) : (
-              <Text style={[textStyles.title, {fontSize: 24, color: colors.text.secondary, textAlign: 'center'}]}>VS</Text>
+              <Text style={gameDetailStyles.vsText}>VS</Text>
             )}
           </View>
           
-          <View style={{flex: 1, alignItems: 'center'}}>
-            <Text style={[textStyles.title, {fontSize: typography.size.lg, textAlign: 'center', marginBottom: spacing.xs}, game.awayTeam === userTeamId && {color: colors.primary}]}>
+          <View style={gameDetailStyles.teamContainer}>
+            <Text style={[gameDetailStyles.teamName, game.awayTeam === userTeamId && gameDetailStyles.userTeamName]}>
               {awayTeam.name}
             </Text>
-            <Text style={[textStyles.small, {fontWeight: typography.weight.medium}]}>AWAY</Text>
+            <Text style={gameDetailStyles.teamLabel}>AWAY</Text>
           </View>
         </View>
       </View>
 
       {/* Game Information */}
-      <View style={{backgroundColor: colors.background.card, marginBottom: spacing.xl, padding: spacing.xl}}>
-        <Text style={[textStyles.title, {fontSize: typography.size.xl, marginBottom: spacing.lg}]}>Game Information</Text>
+      <View style={gameDetailStyles.section}>
+        <Text style={gameDetailStyles.sectionTitle}>Game Information</Text>
         
-        <View style={{marginBottom: spacing.xl}}>
-          <View style={{marginBottom: spacing.md}}>
-            <Text style={[textStyles.caption, {marginBottom: spacing.xs}]}>📅 Date & Time</Text>
-            <Text style={[textStyles.body, {fontWeight: typography.weight.medium}]}>
+        <View style={gameDetailStyles.infoGrid}>
+          <View style={gameDetailStyles.infoItem}>
+            <Text style={gameDetailStyles.infoLabel}>📅 Date & Time</Text>
+            <Text style={gameDetailStyles.infoValue}>
               {formatDateTime(game.date, game.time)}
             </Text>
           </View>
           
-          <View style={{marginBottom: spacing.md}}>
-            <Text style={[textStyles.caption, {marginBottom: spacing.xs}]}>📍 Location</Text>
-            <Text style={[textStyles.body, {fontWeight: typography.weight.medium}]}>{game.location}</Text>
+          <View style={gameDetailStyles.infoItem}>
+            <Text style={gameDetailStyles.infoLabel}>📍 Location</Text>
+            <Text style={gameDetailStyles.infoValue}>{game.location}</Text>
           </View>
           
-          <View style={{marginBottom: spacing.md}}>
-            <Text style={[textStyles.caption, {marginBottom: spacing.xs}]}>🏆 League</Text>
-            <Text style={[textStyles.body, {fontWeight: typography.weight.medium}]}>{league?.name || 'Unknown League'}</Text>
+          <View style={gameDetailStyles.infoItem}>
+            <Text style={gameDetailStyles.infoLabel}>🏆 League</Text>
+            <Text style={gameDetailStyles.infoValue}>{league?.name || 'Unknown League'}</Text>
           </View>
           
-          <View style={{marginBottom: spacing.md}}>
-            <Text style={[textStyles.caption, {marginBottom: spacing.xs}]}>⚽ Week</Text>
-            <Text style={[textStyles.body, {fontWeight: typography.weight.medium}]}>Week {game.week}</Text>
+          <View style={gameDetailStyles.infoItem}>
+            <Text style={gameDetailStyles.infoLabel}>⚽ Week</Text>
+            <Text style={gameDetailStyles.infoValue}>Week {game.week}</Text>
           </View>
         </View>
         
-        <TouchableOpacity style={[buttonStyles.primary, {alignItems: 'center'}]} onPress={handleShare}>
-          <Text style={buttonStyles.primaryText}>📤 Share Game</Text>
+        <TouchableOpacity style={gameDetailStyles.shareButton} onPress={handleShare}>
+          <Text style={gameDetailStyles.shareButtonText}>📤 Share Game</Text>
         </TouchableOpacity>
       </View>
 
@@ -285,23 +287,23 @@ const GameDetailScreen = ({ route, navigation }: any) => {
           
           {game.status === 'Scheduled' ? (
             <>
-              <Text style={styles.pollQuestion}>
+              <Text style={pollStyles.pollQuestion}>
                 Will you be attending this game?
               </Text>
               
-              <View style={styles.pollOptions}>
+              <View style={pollStyles.pollOptions}>
                 {['Yes', 'No', 'Maybe'].map((option) => (
                   <TouchableOpacity
                     key={option}
                     style={[
-                      styles.pollOption,
-                      userResponse === option && styles.selectedPollOption,
+                      pollStyles.pollOption,
+                      userResponse === option && pollStyles.selectedPollOption,
                     ]}
                     onPress={() => handlePollResponse(option as 'Yes' | 'No' | 'Maybe')}
                   >
                     <Text style={[
-                      styles.pollOptionText,
-                      userResponse === option && styles.selectedPollOptionText,
+                      pollStyles.pollOptionText,
+                      userResponse === option && pollStyles.selectedPollOptionText,
                     ]}>
                       {option}
                     </Text>
@@ -310,56 +312,56 @@ const GameDetailScreen = ({ route, navigation }: any) => {
               </View>
               
               {userResponse && (
-                <Text style={styles.responseConfirmation}>
+                <Text style={pollStyles.responseConfirmation}>
                   ✓ Your response: {userResponse}
                 </Text>
               )}
             </>
           ) : (
-            <Text style={styles.pollClosed}>
+            <Text style={pollStyles.pollClosed}>
               Attendance polling is closed for this game.
             </Text>
           )}
           
           {/* Poll Results */}
-          <View style={styles.pollResults}>
-            <Text style={styles.pollResultsTitle}>Team Response Summary</Text>
+          <View style={pollStyles.pollResults}>
+            <Text style={pollStyles.pollResultsTitle}>Team Response Summary</Text>
             
-            <View style={styles.pollStatsGrid}>
-              <View style={styles.pollStat}>
-                <Text style={[styles.pollStatNumber, { color: '#34C759' }]}>
+            <View style={pollStyles.pollStatsGrid}>
+              <View style={pollStyles.pollStat}>
+                <Text style={[pollStyles.pollStatNumber, { color: '#34C759' }]}>
                   {pollStats.yes}
                 </Text>
-                <Text style={styles.pollStatLabel}>Yes</Text>
+                <Text style={pollStyles.pollStatLabel}>Yes</Text>
               </View>
               
-              <View style={styles.pollStat}>
-                <Text style={[styles.pollStatNumber, { color: '#FF9500' }]}>
+              <View style={pollStyles.pollStat}>
+                <Text style={[pollStyles.pollStatNumber, { color: '#FF9500' }]}>
                   {pollStats.maybe}
                 </Text>
-                <Text style={styles.pollStatLabel}>Maybe</Text>
+                <Text style={pollStyles.pollStatLabel}>Maybe</Text>
               </View>
               
-              <View style={styles.pollStat}>
-                <Text style={[styles.pollStatNumber, { color: '#FF3B30' }]}>
+              <View style={pollStyles.pollStat}>
+                <Text style={[pollStyles.pollStatNumber, { color: '#FF3B30' }]}>
                   {pollStats.no}
                 </Text>
-                <Text style={styles.pollStatLabel}>No</Text>
+                <Text style={pollStyles.pollStatLabel}>No</Text>
               </View>
               
-              <View style={styles.pollStat}>
-                <Text style={[styles.pollStatNumber, { color: '#666' }]}>
+              <View style={pollStyles.pollStat}>
+                <Text style={[pollStyles.pollStatNumber, { color: '#666' }]}>
                   {pollStats.total - pollStats.yes - pollStats.no - pollStats.maybe}
                 </Text>
-                <Text style={styles.pollStatLabel}>No Response</Text>
+                <Text style={pollStyles.pollStatLabel}>No Response</Text>
               </View>
             </View>
             
-            <View style={styles.pollProgress}>
-              <View style={styles.progressBar}>
+            <View style={pollStyles.pollProgress}>
+              <View style={pollStyles.progressBar}>
                 <View 
                   style={[
-                    styles.progressFill,
+                    pollStyles.progressFill,
                     { 
                       width: `${(pollStats.yes + pollStats.maybe + pollStats.no) / pollStats.total * 100}%`,
                       backgroundColor: '#007AFF'
@@ -367,7 +369,7 @@ const GameDetailScreen = ({ route, navigation }: any) => {
                   ]}
                 />
               </View>
-              <Text style={styles.progressText}>
+              <Text style={pollStyles.progressText}>
                 {pollStats.yes + pollStats.maybe + pollStats.no} of {pollStats.total} responded
               </Text>
             </View>
@@ -380,275 +382,28 @@ const GameDetailScreen = ({ route, navigation }: any) => {
         <Text style={[textStyles.title, {fontSize: typography.size.xl, marginBottom: spacing.lg}]}>Quick Actions</Text>
         
         <TouchableOpacity 
-          style={styles.actionButton}
+          style={gameDetailStyles.actionButton}
           onPress={() => navigation.navigate('TeamDetail', { teamId: homeTeam.id })}
         >
-          <Text style={styles.actionButtonText}>View {homeTeam.name}</Text>
+          <Text style={gameDetailStyles.actionButtonText}>View {homeTeam.name}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
-          style={styles.actionButton}
+          style={gameDetailStyles.actionButton}
           onPress={() => navigation.navigate('TeamDetail', { teamId: awayTeam.id })}
         >
-          <Text style={styles.actionButtonText}>View {awayTeam.name}</Text>
+          <Text style={gameDetailStyles.actionButtonText}>View {awayTeam.name}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
-          style={styles.actionButton}
+          style={gameDetailStyles.actionButton}
           onPress={() => navigation.navigate('Schedule')}
         >
-          <Text style={styles.actionButtonText}>View Full Schedule</Text>
+          <Text style={gameDetailStyles.actionButtonText}>View Full Schedule</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 18,
-    color: '#666',
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 40,
-  },
-  errorText: {
-    fontSize: 18,
-    color: '#666',
-    marginBottom: 20,
-  },
-  backButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  backButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  gameHeader: {
-    backgroundColor: '#fff',
-    padding: 20,
-    marginBottom: 20,
-  },
-  statusContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  statusText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
-  },
-  weekText: {
-    fontSize: 14,
-    color: '#666',
-    fontWeight: '500',
-  },
-  matchup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  teamContainer: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  teamName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: 4,
-  },
-  userTeamName: {
-    color: '#007AFF',
-  },
-  teamLabel: {
-    fontSize: 12,
-    color: '#666',
-    fontWeight: '500',
-  },
-  scoreSection: {
-    paddingHorizontal: 20,
-  },
-  finalScore: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: '#007AFF',
-    textAlign: 'center',
-  },
-  vsText: {
-    fontSize: 24,
-    color: '#666',
-    textAlign: 'center',
-  },
-  section: {
-    backgroundColor: '#fff',
-    marginBottom: 20,
-    padding: 20,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 16,
-  },
-  infoGrid: {
-    marginBottom: 20,
-  },
-  infoItem: {
-    marginBottom: 12,
-  },
-  infoLabel: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
-  },
-  infoValue: {
-    fontSize: 16,
-    color: '#333',
-    fontWeight: '500',
-  },
-  shareButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  shareButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  pollQuestion: {
-    fontSize: 16,
-    color: '#333',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  pollOptions: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 16,
-  },
-  pollOption: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderWidth: 2,
-    borderColor: '#e1e5e9',
-    borderRadius: 8,
-    alignItems: 'center',
-    marginHorizontal: 4,
-  },
-  selectedPollOption: {
-    borderColor: '#007AFF',
-    backgroundColor: '#F0F8FF',
-  },
-  pollOptionText: {
-    fontSize: 16,
-    color: '#333',
-    fontWeight: '500',
-  },
-  selectedPollOptionText: {
-    color: '#007AFF',
-    fontWeight: 'bold',
-  },
-  responseConfirmation: {
-    fontSize: 14,
-    color: '#34C759',
-    textAlign: 'center',
-    marginBottom: 20,
-    fontWeight: '500',
-  },
-  pollClosed: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    fontStyle: 'italic',
-    marginBottom: 20,
-  },
-  pollResults: {
-    borderTopWidth: 1,
-    borderTopColor: '#e1e5e9',
-    paddingTop: 20,
-  },
-  pollResultsTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 12,
-  },
-  pollStatsGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 16,
-  },
-  pollStat: {
-    alignItems: 'center',
-  },
-  pollStatNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  pollStatLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 4,
-  },
-  pollProgress: {
-    alignItems: 'center',
-  },
-  progressBar: {
-    width: '100%',
-    height: 8,
-    backgroundColor: '#e1e5e9',
-    borderRadius: 4,
-    marginBottom: 8,
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: 4,
-  },
-  progressText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  actionButton: {
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f1f1',
-  },
-  actionButtonText: {
-    fontSize: 16,
-    color: '#007AFF',
-    fontWeight: '500',
-  },
-});
 
 export default GameDetailScreen;

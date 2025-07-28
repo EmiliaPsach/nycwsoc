@@ -48,7 +48,34 @@ export const spacing = {
   xxxxxl: 50,
 };
 
-export const typography = {
+type FontWeight =
+  | 'normal'
+  | 'bold'
+  | '100'
+  | '200'
+  | '300'
+  | '400'
+  | '500'
+  | '600'
+  | '700'
+  | '800'
+  | '900'
+  | 100
+  | 200
+  | 300
+  | 400
+  | 500
+  | 600
+  | 700
+  | 800
+  | 900;
+
+
+export const typography: {
+  size: Record<string, number>;
+  weight: Record<string, FontWeight>;
+  lineHeight: Record<string, number>;
+} = {
   size: {
     xs: 12,
     sm: 14,
@@ -59,20 +86,19 @@ export const typography = {
     xxxl: 28,
     xxxxl: 32,
   },
-  
   weight: {
     normal: '400',
     medium: '500',
     semiBold: '600',
     bold: 'bold',
   },
-  
   lineHeight: {
     tight: 1.2,
     normal: 1.4,
     relaxed: 1.6,
   },
 };
+
 
 export const borderRadius = {
   sm: 8,

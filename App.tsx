@@ -2,7 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import Icon from 'react-native-vector-icons/Ionicons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import LoginScreen from './src/screens/LoginScreen';
@@ -45,7 +45,7 @@ const MainTabs = () => (
             break;
         }
         
-        return <Icon name={iconName} size={size} color={color} />;
+        return <Ionicons name={iconName} size={size} color={color} />;
       },
       tabBarActiveTintColor: '#007AFF',
       tabBarInactiveTintColor: 'gray',

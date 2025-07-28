@@ -508,3 +508,244 @@ export const statusStyles = StyleSheet.create({
     color: colors.text.inverse,
   },
 });
+
+export const pollStyles = StyleSheet.create({
+  pollQuestion: {
+    fontSize: typography.size.md,
+    color: colors.text.primary,
+    marginBottom: spacing.lg,
+    textAlign: 'center',
+  },
+  
+  pollOptions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: spacing.lg,
+  },
+  
+  pollOption: {
+    flex: 1,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderWidth: 2,
+    borderColor: colors.border.medium,
+    borderRadius: borderRadius.sm,
+    alignItems: 'center',
+    marginHorizontal: spacing.xs,
+  },
+  
+  selectedPollOption: {
+    borderColor: colors.primary,
+    backgroundColor: '#F0F8FF',
+  },
+  
+  pollOptionText: {
+    fontSize: typography.size.md,
+    color: colors.text.primary,
+    fontWeight: typography.weight.medium,
+  },
+  
+  selectedPollOptionText: {
+    color: colors.primary,
+    fontWeight: typography.weight.bold,
+  },
+  
+  responseConfirmation: {
+    fontSize: typography.size.sm,
+    color: colors.secondary,
+    textAlign: 'center',
+    marginBottom: spacing.xl,
+    fontWeight: typography.weight.medium,
+  },
+  
+  pollClosed: {
+    fontSize: typography.size.md,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    marginBottom: spacing.xl,
+  },
+  
+  pollResults: {
+    borderTopWidth: 1,
+    borderTopColor: colors.border.medium,
+    paddingTop: spacing.xl,
+  },
+  
+  pollResultsTitle: {
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.bold,
+    color: colors.text.primary,
+    marginBottom: spacing.md,
+  },
+  
+  pollStatsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: spacing.lg,
+  },
+  
+  pollStat: {
+    alignItems: 'center',
+  },
+  
+  pollStatNumber: {
+    fontSize: typography.size.xxxl,
+    fontWeight: typography.weight.bold,
+  },
+  
+  pollStatLabel: {
+    fontSize: typography.size.xs,
+    color: colors.text.secondary,
+    marginTop: spacing.xs,
+  },
+  
+  pollProgress: {
+    alignItems: 'center',
+  },
+  
+  progressBar: {
+    width: '100%',
+    height: 8,
+    backgroundColor: colors.border.medium,
+    borderRadius: borderRadius.sm,
+    marginBottom: spacing.sm,
+  },
+  
+  progressFill: {
+    height: '100%',
+    borderRadius: borderRadius.sm,
+  },
+  
+  progressText: {
+    fontSize: typography.size.sm,
+    color: colors.text.secondary,
+  },
+});
+
+export const gameDetailStyles = StyleSheet.create({
+  gameHeader: {
+    backgroundColor: colors.background.card,
+    padding: spacing.xl,
+    marginBottom: spacing.xl,
+  },
+  
+  statusContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.xl,
+  },
+  
+  weekText: {
+    fontSize: typography.size.sm,
+    color: colors.text.secondary,
+    fontWeight: typography.weight.medium,
+  },
+  
+  matchup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  
+  teamContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  
+  teamName: {
+    fontSize: typography.size.lg,
+    fontWeight: typography.weight.bold,
+    color: colors.text.primary,
+    textAlign: 'center',
+    marginBottom: spacing.xs,
+  },
+  
+  userTeamName: {
+    color: colors.primary,
+  },
+  
+  teamLabel: {
+    fontSize: typography.size.xs,
+    color: colors.text.secondary,
+    fontWeight: typography.weight.medium,
+  },
+  
+  scoreSection: {
+    paddingHorizontal: spacing.xl,
+  },
+  
+  finalScore: {
+    fontSize: 36,
+    fontWeight: typography.weight.bold,
+    color: colors.primary,
+    textAlign: 'center',
+  },
+  
+  vsText: {
+    fontSize: 24,
+    color: colors.text.secondary,
+    textAlign: 'center',
+  },
+  
+  section: {
+    backgroundColor: colors.background.card,
+    marginBottom: spacing.xl,
+    padding: spacing.xl,
+  },
+  
+  sectionTitle: {
+    fontSize: typography.size.xl,
+    fontWeight: typography.weight.bold,
+    color: colors.text.primary,
+    marginBottom: spacing.lg,
+  },
+  
+  infoGrid: {
+    marginBottom: spacing.xl,
+  },
+  
+  infoItem: {
+    marginBottom: spacing.md,
+  },
+  
+  infoLabel: {
+    fontSize: typography.size.sm,
+    color: colors.text.secondary,
+    marginBottom: spacing.xs,
+  },
+  
+  infoValue: {
+    fontSize: typography.size.md,
+    color: colors.text.primary,
+    fontWeight: typography.weight.medium,
+  },
+  
+  shareButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.sm,
+    alignItems: 'center',
+  },
+  
+  shareButtonText: {
+    color: colors.text.inverse,
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.semiBold,
+  },
+  
+  actionButton: {
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
+  },
+  
+  actionButtonText: {
+    fontSize: typography.size.md,
+    color: colors.primary,
+    fontWeight: typography.weight.medium,
+  },
+});
