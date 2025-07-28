@@ -397,7 +397,7 @@ const GameDetailScreen = ({ route, navigation }: any) => {
         
         <TouchableOpacity 
           style={gameDetailStyles.actionButton}
-          onPress={() => navigation.navigate('Schedule')}
+          onPress={() => navigation.navigate('MainTabs', { screen: 'Schedule' })}
         >
           <Text style={gameDetailStyles.actionButtonText}>View Full Schedule</Text>
         </TouchableOpacity>

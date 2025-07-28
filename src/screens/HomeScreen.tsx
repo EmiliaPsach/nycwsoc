@@ -260,7 +260,7 @@ const HomeScreen = ({ navigation }: any) => {
       <View style={{ marginBottom: spacing.xxxl }}>
         <View style={headerStyles.sectionHeader}>
           <Text style={headerStyles.sectionTitle}>Upcoming Games</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Schedule')}>
+          <TouchableOpacity onPress={() => navigation.navigate('MainTabs', { screen: 'Schedule' })}>
             <Text style={headerStyles.sectionAction}>See All</Text>
           </TouchableOpacity>
         </View>
@@ -324,7 +324,7 @@ const HomeScreen = ({ navigation }: any) => {
                 marginBottom: 0,
               }
             ]}
-            onPress={() => navigation.navigate('Schedule')}
+            onPress={() => navigation.navigate('MainTabs', { screen: 'Schedule' })}
           >
             <Text style={{ fontSize: 28, marginBottom: spacing.xs }}>📅</Text>
             <Text style={[
