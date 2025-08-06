@@ -310,7 +310,7 @@ const JoinLeaguesScreen = ({ navigation }: any) => {
           </View>
           <View style={{flexDirection: 'row', marginBottom: spacing.xs}}>
             <Text style={[textStyles.caption, {width: 100}]}>💰 Price:</Text>
-            <Text style={[textStyles.body, {fontWeight: typography.weight.medium, flex: 1}]}>${league.price}</Text>
+            <Text style={[textStyles.body, {fontWeight: typography.weight.medium, flex: 1}]}>${league.regularPrice}</Text>
           </View>
         </View>
 
@@ -506,7 +506,7 @@ const JoinLeaguesScreen = ({ navigation }: any) => {
                     
                     <View style={{flexDirection: 'row', marginBottom: spacing.sm}}>
                       <Text style={[textStyles.caption, {width: 120}]}>Price:</Text>
-                      <Text style={[textStyles.body, {fontWeight: typography.weight.medium, flex: 1}]}>${selectedLeague.price}</Text>
+                      <Text style={[textStyles.body, {fontWeight: typography.weight.medium, flex: 1}]}>${selectedLeague.regularPrice}</Text>
                     </View>
                     
                     <View style={{flexDirection: 'row', marginBottom: spacing.sm}}>

@@ -34,9 +34,11 @@ export interface League {
   maxTeams: number;
   maxPlayersPerTeam: number;
   currentTeams: number;
-  price: number;
+  regularPrice: number;
+  earlyPrice: number;
   description: string;
   registrationDeadline: string;
+  earlyBirdDeadline: string;
   startDate: string;
   endDate: string;
   isActive: boolean;

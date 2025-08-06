@@ -1,5 +1,6 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows, layout } from './theme';
+const { width } = Dimensions.get('window');
 
 export const globalStyles = StyleSheet.create({
   // Container Styles
@@ -747,5 +748,130 @@ export const gameDetailStyles = StyleSheet.create({
     fontSize: typography.size.md,
     color: colors.primary,
     fontWeight: typography.weight.medium,
+  },
+});
+
+const dayCellSize = (width - spacing.xl * 2) / 7;
+
+export const calendarStyles = StyleSheet.create({
+  calendarContainer: {
+    paddingHorizontal: spacing.xl,
+  },
+  calendarHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+    backgroundColor: colors.background.card,
+    borderRadius: 12,
+    padding: spacing.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  navButton: {
+    padding: spacing.sm,
+    borderRadius: 8,
+    backgroundColor: colors.background.card,
+  },
+  headerText: {
+    fontSize: typography.size.lg,
+    fontWeight: typography.weight.bold,
+    color: colors.text.primary,
+  },
+  weekDayLabel: {
+    width: dayCellSize,
+    alignItems: 'center',
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.semiBold,
+    color: colors.text.secondary,
+  },
+  calendarGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    backgroundColor: colors.background.card,
+    borderRadius: 12,
+    overflow: 'hidden',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  dayCell: {
+    width: dayCellSize,
+    minHeight: 80,
+    borderWidth: 0.5,
+    borderColor: colors.border.light,
+    padding: 2,
+  },
+  todayCell: {
+    backgroundColor: colors.primary + '10',
+  },
+  dateText: {
+    fontSize: typography.size.xs,
+    fontWeight: typography.weight.medium,
+    textAlign: 'center',
+    marginBottom: 2,
+  },
+  todayText: {
+    color: colors.primary,
+    fontWeight: typography.weight.bold,
+  },
+  gameChip: {
+    backgroundColor: colors.primary,
+    borderRadius: 4,
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    marginBottom: 2,
+    minHeight: 16,
+  },
+  gameChipText: {
+    fontSize: 9,
+    color: colors.background.card,
+    fontWeight: typography.weight.medium,
+  },
+  moreGamesChip: {
+    backgroundColor: colors.text.secondary,
+    borderRadius: 2,
+    padding: 1,
+    alignItems: 'center',
+  },
+  moreGamesText: {
+    fontSize: 8,
+    color: colors.background.card,
+    fontWeight: typography.weight.medium,
+  },
+  legendContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: spacing.lg,
+    padding: spacing.md,
+    backgroundColor: colors.background.card,
+    borderRadius: 8,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: spacing.lg,
+  },
+  legendSquare: {
+    width: 16,
+    height: 8,
+    borderRadius: 2,
+    marginRight: spacing.xs,
+    backgroundColor: colors.primary,
+  },
+  legendToday: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    backgroundColor: colors.primary + '20',
+    borderWidth: 1,
+    borderColor: colors.primary,
+    marginRight: spacing.xs,
   },
 });
