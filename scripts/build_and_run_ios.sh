@@ -8,6 +8,17 @@ cd ios
 pod install
 cd ..
 
+echo "Checking if Metro bundler is already running..."
+METRO_PID=$(lsof -i :8081 -t)
+
+if [ -n "$METRO_PID" ]; then
+  echo "Metro is already running on port 8081 (PID $METRO_PID). Killing it..."
+  kill -9 $METRO_PID
+  sleep 1
+else
+  echo "No Metro bundler running. Proceeding..."
+fi
+
 echo "Starting Metro bundler in background..."
 npx react-native start --reset-cache &
 METRO_PID=$!
@@ -18,9 +29,9 @@ sleep 3
 echo "Building and running the app on iOS simulator..."
 npx react-native run-ios
 if [ $? -ne 0 ]; then
-  echo "Failed to build and run the app. Please check for errors."
+  echo "❌ Failed to build and run the app. Cleaning up Metro bundler..."
   kill $METRO_PID
   exit 1
 fi
 
-echo "App is running on the iOS simulator."
+echo "✅ App is running on the iOS simulator."

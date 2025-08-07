@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
@@ -81,6 +81,19 @@ const MainStack = () => (
 
 const AppContent = () => {
   const { user } = useAuth();
+
+  useEffect(() => {
+    const resetStorage = async () => {
+      try {
+        await AsyncStorage.clear();
+        console.log('✅ AsyncStorage cleared on app start.');
+      } catch (err) {
+        console.error('❌ Failed to clear AsyncStorage:', err);
+      }
+    };
+
+    resetStorage();
+  }, []);
   
   return (
     <NavigationContainer>

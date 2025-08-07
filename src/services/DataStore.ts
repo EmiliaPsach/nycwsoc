@@ -69,6 +69,55 @@ export class DataStore {
         teams: ['team2'],
         createdAt: new Date().toISOString(),
         isActive: true
+      },
+      // More players
+      {
+        id: 'user3',
+        email: 'jessie@example.com',
+        name: 'Jessie Smith',
+        zipCode: '10003',
+        jerseySize: 'S',
+        gender: 'Woman',
+        skillLevel: 'Beginner',
+        teams: ['team1'],
+        createdAt: new Date().toISOString(),
+        isActive: true
+      },
+      {
+        id: 'user4',
+        email: 'taylor@example.com',
+        name: 'Taylor Kim',
+        zipCode: '10004',
+        jerseySize: 'M',
+        gender: 'Woman',
+        skillLevel: 'Intermediate',
+        teams: ['team1'],
+        createdAt: new Date().toISOString(),
+        isActive: true
+      },
+      {
+        id: 'user5',
+        email: 'morgan@example.com',
+        name: 'Morgan Lee',
+        zipCode: '10005',
+        jerseySize: 'L',
+        gender: 'Non-binary',
+        skillLevel: 'Advanced',
+        teams: ['team2'],
+        createdAt: new Date().toISOString(),
+        isActive: true
+      },
+      {
+        id: 'user6',
+        email: 'christen@example.com',
+        name: 'Christen Doe',
+        zipCode: '10006',
+        jerseySize: 'M',
+        gender: 'Woman',
+        skillLevel: 'Intermediate',
+        teams: ['team2'],
+        createdAt: new Date().toISOString(),
+        isActive: true
       }
     ];
 
@@ -77,7 +126,7 @@ export class DataStore {
         id: 'team1',
         name: 'Brooklyn Thunder',
         leagueId: 'league1',
-        players: ['user1'],
+        players: ['user1', 'user3', 'user4'],
         captain: 'user1',
         createdAt: new Date().toISOString(),
         isActive: true,
@@ -87,7 +136,7 @@ export class DataStore {
         id: 'team2',
         name: 'Manhattan United',
         leagueId: 'league1',
-        players: ['user2'],
+        players: ['user2', 'user5', 'user6'],
         captain: 'user2',
         createdAt: new Date().toISOString(),
         isActive: true,
@@ -103,17 +152,17 @@ export class DataStore {
         skillLevel: 'Intermediate',
         dayOfWeek: 'Sunday',
         time: '10:00 AM',
-        season: 'Fall 2024',
+        season: 'Fall 2025',
         maxTeams: 8,
         maxPlayersPerTeam: 15,
         currentTeams: 6,
         regularPrice: 150,
         earlyPrice: 120,
         description: 'Competitive 11v11 league in Central Park with experienced referees.',
-        registrationDeadline: '2024-12-15',
-        earlyBirdDeadline: '2024-12-01',
-        startDate: '2025-01-06',
-        endDate: '2025-03-30',
+        registrationDeadline: '2025-11-15T23:59:59Z',
+        earlyBirdDeadline: '2025-10-15T23:59:59Z',
+        startDate: '2025-09-07T10:00:00Z',
+        endDate: '2025-12-14T10:00:00Z',
         isActive: true,
         createdAt: new Date().toISOString()
       },
@@ -124,17 +173,17 @@ export class DataStore {
         skillLevel: 'Beginner',
         dayOfWeek: 'Wednesday',
         time: '7:00 PM',
-        season: 'Fall 2024',
+        season: 'Fall 2025',
         maxTeams: 6,
         maxPlayersPerTeam: 12,
         currentTeams: 4,
         regularPrice: 120,
         earlyPrice: 100,
         description: 'Perfect for newcomers to soccer! Focus on learning and having fun.',
-        registrationDeadline: '2024-12-10',
-        earlyBirdDeadline: '2024-12-01',
-        startDate: '2025-01-08',
-        endDate: '2025-03-26',
+        registrationDeadline: '2025-11-10T23:59:59Z',
+        earlyBirdDeadline: '2025-10-10T23:59:59Z',
+        startDate: '2025-09-10T19:00:00Z',
+        endDate: '2025-12-17T19:00:00Z',
         isActive: true,
         createdAt: new Date().toISOString()
       },
@@ -145,17 +194,17 @@ export class DataStore {
         skillLevel: 'Advanced',
         dayOfWeek: 'Friday',
         time: '8:00 PM',
-        season: 'Winter 2025',
+        season: 'Fall 2025',
         maxTeams: 10,
         maxPlayersPerTeam: 18,
         currentTeams: 3,
         regularPrice: 200,
         earlyPrice: 180,
         description: 'High-level competition for experienced players.',
-        registrationDeadline: '2024-12-20',
-        earlyBirdDeadline: '2024-12-01',
-        startDate: '2025-01-10',
-        endDate: '2025-04-04',
+        registrationDeadline: '2025-11-20T23:59:59Z',
+        earlyBirdDeadline: '2025-10-20T23:59:59Z',
+        startDate: '2025-09-12T20:00:00Z',
+        endDate: '2025-12-19T20:00:00Z',
         isActive: true,
         createdAt: new Date().toISOString()
       }
@@ -166,7 +215,7 @@ export class DataStore {
         id: 'game1',
         homeTeam: 'team1',
         awayTeam: 'team2',
-        date: '2025-01-12',
+        date: '2025-09-14T10:00:00Z',
         time: '10:00 AM',
         location: 'Central Park Field 1',
         leagueId: 'league1',
@@ -178,7 +227,7 @@ export class DataStore {
         id: 'game2',
         homeTeam: 'team2',
         awayTeam: 'team1',
-        date: '2025-01-19',
+        date: '2025-09-21T10:00:00Z',
         time: '10:00 AM',
         location: 'Central Park Field 2',
         leagueId: 'league1',
@@ -199,7 +248,6 @@ export class DataStore {
       }
     ];
 
-    // Store sample data
     await AsyncStorage.setItem(this.USERS_KEY, JSON.stringify(sampleUsers));
     await AsyncStorage.setItem(this.TEAMS_KEY, JSON.stringify(sampleTeams));
     await AsyncStorage.setItem(this.LEAGUES_KEY, JSON.stringify(sampleLeagues));
@@ -209,6 +257,8 @@ export class DataStore {
     await AsyncStorage.setItem(this.FREE_AGENT_REGISTRATIONS_KEY, JSON.stringify([]));
     await AsyncStorage.setItem(this.TEAM_REGISTRATIONS_KEY, JSON.stringify([]));
   }
+
+
 
   private async getStoredData<T>(key: string): Promise<T | null> {
     try {

@@ -374,6 +374,30 @@ const GameDetailScreen = ({ route, navigation }: any) => {
               </Text>
             </View>
           </View>
+          {/* Detailed Responses */}
+          <View style={{ marginTop: 16 }}>
+            <Text style={[pollStyles.pollResultsTitle, { marginBottom: 8 }]}>
+              Detailed Responses
+            </Text>
+
+            {teamPlayers.length === 0 && <Text>No players found.</Text>}
+
+            {teamPlayers.map(player => {
+              const response = poll?.responses[player.id] || 'No Response';
+              let color = '#666'; // default gray for no response
+
+              if (response === 'Yes') color = '#34C759';
+              else if (response === 'Maybe') color = '#FF9500';
+              else if (response === 'No') color = '#FF3B30';
+
+              return (
+                <View key={player.id} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4 }}>
+                  <Text style={{ fontWeight: '600' }}>{player.name}</Text>
+                  <Text style={{ color, fontWeight: '700' }}>{response}</Text>
+                </View>
+              );
+            })}
+          </View>
         </View>
       )}
 

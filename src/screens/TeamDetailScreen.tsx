@@ -275,6 +275,9 @@ const TeamDetailScreen = ({ route, navigation }: any) => {
           
           <View style={{gap: spacing.xs}}>
             <Text style={textStyles.caption}>
+              🗽 {league?.name || 'Unknown League Name'}
+            </Text>
+            <Text style={textStyles.caption}>
               📍 {league?.location || 'Unknown Location'}
             </Text>
             <Text style={textStyles.caption}>
