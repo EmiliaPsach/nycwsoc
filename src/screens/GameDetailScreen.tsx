@@ -12,6 +12,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { DataStore } from '../services/DataStore';
 import { Game, Team, User, Poll, League } from '../types';
+import AttendanceReminderPanel from './AttendanceReminderPanel';
 import {
   globalStyles,
   cardStyles,
@@ -400,6 +401,21 @@ const GameDetailScreen = ({ route, navigation }: any) => {
             })}
           </View>
         </View>
+      )}
+
+      {/* Attendance Reminder Panel */}
+      {game && userTeamId && (userTeamId === homeTeam?.id || userTeamId === awayTeam?.id) && (
+        <AttendanceReminderPanel
+          game={game}
+          team={userTeamId === homeTeam?.id ? homeTeam : awayTeam!}
+          poll={poll}
+          teamPlayers={teamPlayers}
+          userTeamId={userTeamId}
+          onReminderSent={() => {
+            // Optionally refresh data after reminder is sent
+            loadData();
+          }}
+        />
       )}
 
       {/* Quick Actions */}

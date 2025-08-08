@@ -10,6 +10,7 @@ export interface User {
   createdAt: string;
   isActive: boolean;
   phoneNumber?: string;
+  role?: 'player' | 'admin' | 'super_admin';
 }
 
 export interface Team {

@@ -39,3 +39,27 @@
 - Lightweight in-memory data store (perfect prototype)
 - Easily replaceable with Firebase, Supabase, or other backend
 - Structured for scalability
+
+## 🔔 Automatic Reminders
+
+- Schedules notifications 4 days before each game
+- Only sends to players who haven't responded to the attendance poll
+- Can be enabled/disabled per team by users
+
+## 👑 Manual Reminders
+
+- Captains and admins can send immediate reminders
+- Select specific players who haven't responded
+- Customized messages showing sender's role (👑 for captain, 🛡️ for admin)
+
+## 📱 Smart Notifications
+
+- Tapping notifications navigates directly to the game detail screen
+- Different notification channels for automatic vs manual reminders
+- Works offline (local notifications)
+
+## 🎛️ User Control
+
+- Toggle switch to enable/disable automatic reminders
+- Shows unresponded player count
+- "Select All" functionality for bulk manual reminders

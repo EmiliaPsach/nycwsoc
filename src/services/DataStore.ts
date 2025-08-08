@@ -353,13 +353,6 @@ export class DataStore {
     return teams.filter(t => user.teams.includes(t.id) && t.isActive);
   }
 
-  async getPlayersInTeam(teamId: string): Promise<User[]> {
-    const team = await this.getTeam(teamId);
-    if (!team) return [];
-
-    const users = await this.getStoredData<User[]>(this.USERS_KEY) || [];
-    return users.filter(u => team.players.includes(u.id) && u.isActive);
-  }
 
   // League methods
   async getLeagues(filters?: {
@@ -472,5 +465,105 @@ export class DataStore {
   async getFreeAgentRegistrationsForUser(userId: string): Promise<FreeAgentRegistration[]> {
     const registrations = await this.getStoredData<FreeAgentRegistration[]>(this.FREE_AGENT_REGISTRATIONS_KEY) || [];
     return registrations.filter(r => r.userId === userId);
+  }
+
+  // Push Notification & Reminder methods
+  private REMINDER_SETTINGS_KEY = 'reminder_settings';
+  private REMINDER_LOGS_KEY = 'reminder_logs';
+
+  async getAutoReminderSetting(teamId: string, userId: string): Promise<boolean> {
+    try {
+      const settings = await this.getStoredData<{[key: string]: boolean}>(this.REMINDER_SETTINGS_KEY) || {};
+      const key = `${teamId}_${userId}`;
+      return settings[key] !== undefined ? settings[key] : true; // Default to true
+    } catch (error) {
+      console.error('Error getting auto reminder setting:', error);
+      return true;
+    }
+  }
+
+  async setAutoReminderSetting(teamId: string, userId: string, enabled: boolean): Promise<void> {
+    try {
+      const settings = await this.getStoredData<{[key: string]: boolean}>(this.REMINDER_SETTINGS_KEY) || {};
+      const key = `${teamId}_${userId}`;
+      settings[key] = enabled;
+      await this.setStoredData(this.REMINDER_SETTINGS_KEY, settings);
+    } catch (error) {
+      console.error('Error setting auto reminder setting:', error);
+      throw error;
+    }
+  }
+
+  async getAllUpcomingGames(): Promise<Game[]> {
+    try {
+      const games = await this.getStoredData<Game[]>(this.GAMES_KEY) || [];
+      const now = new Date();
+      
+      return games.filter(game => {
+        const gameDate = new Date(game.date);
+        return game.status === 'Scheduled' && gameDate > now;
+      }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    } catch (error) {
+      console.error('Error getting upcoming games:', error);
+      return [];
+    }
+  }
+
+  async getPlayersInTeam(teamId: string): Promise<User[]> {
+    try {
+      const team = await this.getTeam(teamId);
+      if (!team) return [];
+
+      const users = await this.getStoredData<User[]>(this.USERS_KEY) || [];
+      return users.filter(user => team.players.includes(user.id));
+    } catch (error) {
+      console.error('Error getting players in team:', error);
+      return [];
+    }
+  }
+
+  async logReminderSent(reminderLog: {
+    gameId: string;
+    teamId: string;
+    senderId: string;
+    senderName: string;
+    senderRole: string;
+    recipientIds: string[];
+    sentAt: string;
+    type: string;
+  }): Promise<void> {
+    try {
+      const logs = await this.getStoredData<typeof reminderLog[]>(this.REMINDER_LOGS_KEY) || [];
+      
+      const logEntry = {
+        ...reminderLog,
+        id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      };
+      
+      logs.push(logEntry);
+      await this.setStoredData(this.REMINDER_LOGS_KEY, logs);
+    } catch (error) {
+      console.error('Error logging reminder sent:', error);
+      throw error;
+    }
+  }
+
+  async getReminderLogs(gameId?: string, teamId?: string): Promise<any[]> {
+    try {
+      const logs = await this.getStoredData<any[]>(this.REMINDER_LOGS_KEY) || [];
+      
+      if (gameId || teamId) {
+        return logs.filter(log => {
+          const gameMatch = !gameId || log.gameId === gameId;
+          const teamMatch = !teamId || log.teamId === teamId;
+          return gameMatch && teamMatch;
+        });
+      }
+      
+      return logs;
+    } catch (error) {
+      console.error('Error getting reminder logs:', error);
+      return [];
+    }
   }
 }
