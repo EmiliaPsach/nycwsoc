@@ -22,7 +22,8 @@ import {
   spacing,
   typography,
   borderRadius,
-  shadows
+  shadows,
+  screenConfig
 } from '../styles';
 
 const TeamDetailScreen = ({ route, navigation }: any) => {
@@ -260,7 +261,7 @@ const TeamDetailScreen = ({ route, navigation }: any) => {
 
   return (
     <ScrollView
-      style={globalStyles.container}
+      style={[globalStyles.container, { paddingTop: screenConfig.topPadding }]}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }

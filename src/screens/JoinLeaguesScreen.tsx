@@ -26,7 +26,8 @@ import {
   spacing,
   typography,
   borderRadius,
-  statusStyles
+  statusStyles,
+  screenConfig
 } from '../styles';
 
 const JoinLeaguesScreen = ({ navigation }: any) => {
@@ -363,7 +364,7 @@ const JoinLeaguesScreen = ({ navigation }: any) => {
   }
 
   return (
-    <View style={globalStyles.container}>
+    <View style={[globalStyles.container, { paddingTop: screenConfig.topPadding }]}>
       <View style={[headerStyles.header, {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}]}>
         <Text style={headerStyles.headerTitle}>Join Leagues</Text>
         <TouchableOpacity

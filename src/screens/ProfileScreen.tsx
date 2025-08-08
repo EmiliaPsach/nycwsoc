@@ -23,7 +23,8 @@ import {
   colors,
   spacing,
   typography,
-  borderRadius
+  borderRadius,
+  screenConfig
 } from '../styles';
 
 const ProfileScreen = () => {
@@ -157,7 +158,7 @@ const ProfileScreen = () => {
 
   return (
     <KeyboardAvoidingView
-      style={globalStyles.container}
+      style={[globalStyles.container, { paddingTop: screenConfig.topPadding }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={[headerStyles.header, {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}]}>

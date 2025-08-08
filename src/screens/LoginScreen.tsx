@@ -16,7 +16,8 @@ import {
   formStyles, 
   textStyles,
   colors,
-  spacing 
+  spacing,
+  screenConfig
 } from '../styles';
 
 const LoginScreen = ({ navigation }: any) => {
@@ -51,7 +52,7 @@ const LoginScreen = ({ navigation }: any) => {
 
   return (
     <KeyboardAvoidingView 
-      style={globalStyles.container} 
+      style={[globalStyles.container, { paddingTop: screenConfig.topPadding }]} 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView contentContainerStyle={globalStyles.scrollContainer}>

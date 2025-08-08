@@ -22,7 +22,8 @@ import {
   colors,
   spacing,
   typography,
-  statusStyles
+  statusStyles,
+  screenConfig
 } from '../styles';
 
 const { width } = Dimensions.get('window');
@@ -493,7 +494,7 @@ const ScheduleScreen = ({ navigation }: any) => {
   }
 
   return (
-    <View style={globalStyles.container}>
+    <View style={[globalStyles.container, { paddingTop: screenConfig.topPadding }]}>
       <View style={headerStyles.header}>
         <View style={{
           flexDirection: 'row',

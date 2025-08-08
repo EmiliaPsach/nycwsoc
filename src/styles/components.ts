@@ -2,11 +2,22 @@ import { StyleSheet, Dimensions } from 'react-native';
 import { colors, spacing, typography, borderRadius, shadows, layout } from './theme';
 const { width } = Dimensions.get('window');
 
+// Screen Configuration
+export const screenConfig = {
+  topPadding: 20, // Configurable top padding for all screens
+};
+
 export const globalStyles = StyleSheet.create({
   // Container Styles
   container: {
     flex: 1,
     backgroundColor: colors.background.main,
+  },
+  
+  containerWithPadding: {
+    flex: 1,
+    backgroundColor: colors.background.main,
+    paddingTop: screenConfig.topPadding,
   },
   
   safeArea: {

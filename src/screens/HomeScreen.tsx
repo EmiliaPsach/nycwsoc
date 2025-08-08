@@ -19,6 +19,7 @@ import {
   textStyles,
   colors,
   spacing,
+  screenConfig,
 } from '../styles';
 
 const HomeScreen = ({ navigation }: any) => {
@@ -214,7 +215,7 @@ const HomeScreen = ({ navigation }: any) => {
 
   return (
     <ScrollView 
-      style={globalStyles.container}
+      style={[globalStyles.container, { paddingTop: screenConfig.topPadding }]}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
