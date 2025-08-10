@@ -147,13 +147,13 @@ const AdminScheduleGamesScreen = ({ route, navigation }: any) => {
       const gameDates = calculateGameDates(updatedLeague, schedulePreview);
       const dateMap = new Map(gameDates.map(gd => [gd.gameId, { date: gd.date, time: gd.time }]));
 
-      // Create games
-      const games: Game[] = schedulePreview.map(scheduleGame => {
+      // Create games with better unique IDs
+      const games: Game[] = schedulePreview.map((scheduleGame, index) => {
         const gameId = `${scheduleGame.homeTeamId}_${scheduleGame.awayTeamId}_w${scheduleGame.week}`;
         const dateInfo = dateMap.get(gameId);
         
         return {
-          id: `game_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          id: `game_${league.id}_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 9)}`,
           homeTeam: scheduleGame.homeTeamId,
           awayTeam: scheduleGame.awayTeamId,
           leagueId: league.id,
@@ -168,17 +168,24 @@ const AdminScheduleGamesScreen = ({ route, navigation }: any) => {
         };
       });
 
-      // Save all games
-      await Promise.all(games.map(game => dataStore.createGame(game)));
+      // Replace all games for this league atomically
+      const existingGames = await dataStore.getGamesByLeague(league.id);
+      console.log(`Replacing ${existingGames.length} existing games with ${games.length} new games for league ${league.id}`);
+      
+      await dataStore.replaceGamesByLeague(league.id, games);
+      
+      // Verify the operation
+      const finalGames = await dataStore.getGamesByLeague(league.id);
+      console.log(`Final game count for league: ${finalGames.length}`);
 
       Alert.alert(
         'Success!', 
-        `Created ${games.length} games for ${league.name}`,
+        `Rescheduled ${games.length} games for ${league.name}. Previous games have been replaced.`,
         [{ text: 'OK', onPress: () => navigation.goBack() }]
       );
     } catch (error) {
-      console.error('Error creating games:', error);
-      Alert.alert('Error', 'Failed to create games. Please try again.');
+      console.error('Error rescheduling games:', error);
+      Alert.alert('Error', 'Failed to reschedule games. Please try again.');
     } finally {
       setScheduling(false);
       setShowPreview(false);
@@ -326,12 +333,19 @@ const AdminScheduleGamesScreen = ({ route, navigation }: any) => {
               disabled={scheduling}
             >
               <Text style={[buttonStyles.secondaryText, { color: colors.primary }]}>
-                {scheduling ? 'Creating...' : 'Confirm'}
+                {scheduling ? 'Rescheduling...' : 'Reschedule All'}
               </Text>
             </TouchableOpacity>
           </View>
 
           <ScrollView style={{ flex: 1, padding: spacing.xl }}>
+            <View style={[cardStyles.card, { marginBottom: spacing.lg, backgroundColor: colors.warning + '20', borderColor: colors.warning, borderWidth: 1 }]}>
+              <Text style={[textStyles.subtitle, { color: colors.warning, marginBottom: spacing.sm }]}>⚠️ Important</Text>
+              <Text style={[textStyles.body, { color: colors.text.primary }]}>
+                Confirming will <Text style={{ fontWeight: typography.weight.bold }}>delete all existing games</Text> for this league and create the new schedule below.
+              </Text>
+            </View>
+            
             {scheduleStats && (
               <View style={[cardStyles.card, { marginBottom: spacing.lg }]}>
                 <Text style={[textStyles.subtitle, { marginBottom: spacing.md }]}>Statistics</Text>

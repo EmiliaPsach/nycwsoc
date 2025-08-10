@@ -943,6 +943,20 @@ export class DataStore {
     }
   }
 
+  async replaceGamesByLeague(leagueId: string, newGames: Game[]): Promise<void> {
+    try {
+      const allGames = await this.getStoredData<Game[]>(this.GAMES_KEY) || [];
+      // Remove all existing games for this league
+      const otherGames = allGames.filter(game => game.leagueId !== leagueId);
+      // Add the new games
+      const updatedGames = [...otherGames, ...newGames];
+      await this.setStoredData(this.GAMES_KEY, updatedGames);
+    } catch (error) {
+      console.error('Error replacing games by league:', error);
+      throw error;
+    }
+  }
+
   async updateLeague(league: League): Promise<void> {
     try {
       const leagues = await this.getStoredData<League[]>(this.LEAGUES_KEY) || [];

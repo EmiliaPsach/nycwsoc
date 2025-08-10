@@ -7,6 +7,8 @@ import {
   RefreshControl,
   Alert,
   Share,
+  TextInput,
+  Modal,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
@@ -22,6 +24,7 @@ import {
   statusStyles,
   pollStyles,
   gameDetailStyles,
+  formStyles,
   colors,
   spacing,
   typography,
@@ -41,6 +44,15 @@ const GameDetailScreen = ({ route, navigation }: any) => {
   const [teamPlayers, setTeamPlayers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState({
+    date: '',
+    time: '',
+    location: '',
+    homeScore: '',
+    awayScore: '',
+    status: 'Scheduled' as Game['status']
+  });
   const dataStore = new DataStore();
 
   const loadData = async () => {
@@ -81,6 +93,16 @@ const GameDetailScreen = ({ route, navigation }: any) => {
       setUserTeamId(userTeam?.id || null);
       setPoll(pollData);
       setTeamPlayers(playersData);
+      
+      // Initialize edit form with current game data
+      setEditForm({
+        date: gameData.date,
+        time: gameData.time,
+        location: gameData.location,
+        homeScore: gameData.homeScore?.toString() || '',
+        awayScore: gameData.awayScore?.toString() || '',
+        status: gameData.status
+      });
     } catch (error) {
       console.error('Error loading game data:', error);
       Alert.alert('Error', 'Failed to load game data');
@@ -180,6 +202,43 @@ const GameDetailScreen = ({ route, navigation }: any) => {
     }
   };
 
+  const handleEditGame = async () => {
+    if (!game) return;
+    
+    try {
+      const updatedGame: Game = {
+        ...game,
+        date: editForm.date,
+        time: editForm.time,
+        location: editForm.location,
+        homeScore: editForm.homeScore ? parseInt(editForm.homeScore) : undefined,
+        awayScore: editForm.awayScore ? parseInt(editForm.awayScore) : undefined,
+        status: editForm.status
+      };
+      
+      await dataStore.updateGame(updatedGame);
+      setGame(updatedGame);
+      setShowEditModal(false);
+      Alert.alert('Success', 'Game updated successfully');
+    } catch (error) {
+      console.error('Error updating game:', error);
+      Alert.alert('Error', 'Failed to update game. Please try again.');
+    }
+  };
+
+  const openEditModal = () => {
+    if (!game) return;
+    setEditForm({
+      date: game.date,
+      time: game.time,
+      location: game.location,
+      homeScore: game.homeScore?.toString() || '',
+      awayScore: game.awayScore?.toString() || '',
+      status: game.status
+    });
+    setShowEditModal(true);
+  };
+
   if (loading) {
     return (
       <View style={globalStyles.loadingContainer}>
@@ -205,6 +264,7 @@ const GameDetailScreen = ({ route, navigation }: any) => {
   const userResponse = getUserResponse();
   const pollStats = getPollStats();
   const isUserTeamGame = Boolean(userTeamId);
+  const isAdmin = user && (user.role === 'admin' || user.role === 'super_admin');
 
   return (
     <ScrollView
@@ -277,9 +337,20 @@ const GameDetailScreen = ({ route, navigation }: any) => {
           </View>
         </View>
         
-        <TouchableOpacity style={gameDetailStyles.shareButton} onPress={handleShare}>
-          <Text style={gameDetailStyles.shareButtonText}>📤 Share Game</Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', gap: spacing.md }}>
+          <TouchableOpacity style={[gameDetailStyles.shareButton, { flex: 1 }]} onPress={handleShare}>
+            <Text style={gameDetailStyles.shareButtonText}>📤 Share Game</Text>
+          </TouchableOpacity>
+          
+          {isAdmin && (
+            <TouchableOpacity 
+              style={[gameDetailStyles.shareButton, { flex: 1, backgroundColor: colors.primary }]} 
+              onPress={openEditModal}
+            >
+              <Text style={[gameDetailStyles.shareButtonText, { color: colors.text.inverse }]}>✏️ Edit Game</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       {/* Attendance Poll - Only show for user's team games */}
@@ -448,6 +519,109 @@ const GameDetailScreen = ({ route, navigation }: any) => {
           <Text style={gameDetailStyles.actionButtonText}>View Full Schedule</Text>
         </TouchableOpacity>
       </View>
+      
+      {/* Admin Edit Modal */}
+      {isAdmin && (
+        <Modal visible={showEditModal} animationType="slide" presentationStyle="pageSheet">
+          <View style={[globalStyles.container, { paddingTop: screenConfig.topPadding }]}>
+            <View style={headerStyles.header}>
+              <TouchableOpacity onPress={() => setShowEditModal(false)}>
+                <Text style={[textStyles.body, { color: colors.primary }]}>Cancel</Text>
+              </TouchableOpacity>
+              <Text style={headerStyles.headerTitle}>Edit Game</Text>
+              <TouchableOpacity onPress={handleEditGame}>
+                <Text style={[textStyles.body, { color: colors.primary, fontWeight: typography.weight.semiBold }]}>Save</Text>
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView style={{ flex: 1, padding: spacing.xl }}>
+              <View style={cardStyles.card}>
+                <Text style={[textStyles.subtitle, { marginBottom: spacing.lg }]}>Game Details</Text>
+                
+                <View style={formStyles.inputContainer}>
+                  <Text style={formStyles.label}>Date</Text>
+                  <TextInput
+                    style={formStyles.input}
+                    value={editForm.date}
+                    onChangeText={(text) => setEditForm({ ...editForm, date: text })}
+                    placeholder="YYYY-MM-DD"
+                  />
+                </View>
+                
+                <View style={formStyles.inputContainer}>
+                  <Text style={formStyles.label}>Time</Text>
+                  <TextInput
+                    style={formStyles.input}
+                    value={editForm.time}
+                    onChangeText={(text) => setEditForm({ ...editForm, time: text })}
+                    placeholder="8:00 PM"
+                  />
+                </View>
+                
+                <View style={formStyles.inputContainer}>
+                  <Text style={formStyles.label}>Location</Text>
+                  <TextInput
+                    style={formStyles.input}
+                    value={editForm.location}
+                    onChangeText={(text) => setEditForm({ ...editForm, location: text })}
+                    placeholder="Field location"
+                  />
+                </View>
+                
+                <View style={formStyles.inputContainer}>
+                  <Text style={formStyles.label}>Status</Text>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+                    {(['Scheduled', 'In Progress', 'Completed', 'Cancelled'] as Game['status'][]).map((status) => (
+                      <TouchableOpacity
+                        key={status}
+                        style={[
+                          buttonStyles.secondary,
+                          { paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
+                          editForm.status === status && { backgroundColor: colors.primary }
+                        ]}
+                        onPress={() => setEditForm({ ...editForm, status })}
+                      >
+                        <Text style={[
+                          buttonStyles.secondaryText,
+                          editForm.status === status && { color: colors.text.inverse }
+                        ]}>
+                          {status}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+                
+                {editForm.status === 'Completed' && (
+                  <>
+                    <View style={formStyles.inputContainer}>
+                      <Text style={formStyles.label}>Home Score ({homeTeam?.name})</Text>
+                      <TextInput
+                        style={formStyles.input}
+                        value={editForm.homeScore}
+                        onChangeText={(text) => setEditForm({ ...editForm, homeScore: text })}
+                        keyboardType="numeric"
+                        placeholder="0"
+                      />
+                    </View>
+                    
+                    <View style={formStyles.inputContainer}>
+                      <Text style={formStyles.label}>Away Score ({awayTeam?.name})</Text>
+                      <TextInput
+                        style={formStyles.input}
+                        value={editForm.awayScore}
+                        onChangeText={(text) => setEditForm({ ...editForm, awayScore: text })}
+                        keyboardType="numeric"
+                        placeholder="0"
+                      />
+                    </View>
+                  </>
+                )}
+              </View>
+            </ScrollView>
+          </View>
+        </Modal>
+      )}
     </ScrollView>
   );
 };
