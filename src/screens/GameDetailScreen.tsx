@@ -422,19 +422,24 @@ const GameDetailScreen = ({ route, navigation }: any) => {
       <View style={{backgroundColor: colors.background.card, marginBottom: spacing.xl, padding: spacing.xl}}>
         <Text style={[textStyles.title, {fontSize: typography.size.xl, marginBottom: spacing.lg}]}>Quick Actions</Text>
         
-        <TouchableOpacity 
-          style={gameDetailStyles.actionButton}
-          onPress={() => navigation.navigate('TeamDetail', { teamId: homeTeam.id })}
-        >
-          <Text style={gameDetailStyles.actionButtonText}>View {homeTeam.name}</Text>
-        </TouchableOpacity>
+        {/* Only show the user's team (either home or away) */}
+        {userTeamId === homeTeam?.id && (
+          <TouchableOpacity 
+            style={gameDetailStyles.actionButton}
+            onPress={() => navigation.navigate('TeamDetail', { teamId: homeTeam.id })}
+          >
+            <Text style={gameDetailStyles.actionButtonText}>View {homeTeam.name}</Text>
+          </TouchableOpacity>
+        )}
         
-        <TouchableOpacity 
-          style={gameDetailStyles.actionButton}
-          onPress={() => navigation.navigate('TeamDetail', { teamId: awayTeam.id })}
-        >
-          <Text style={gameDetailStyles.actionButtonText}>View {awayTeam.name}</Text>
-        </TouchableOpacity>
+        {userTeamId === awayTeam?.id && (
+          <TouchableOpacity 
+            style={gameDetailStyles.actionButton}
+            onPress={() => navigation.navigate('TeamDetail', { teamId: awayTeam.id })}
+          >
+            <Text style={gameDetailStyles.actionButtonText}>View {awayTeam.name}</Text>
+          </TouchableOpacity>
+        )}
         
         <TouchableOpacity 
           style={gameDetailStyles.actionButton}

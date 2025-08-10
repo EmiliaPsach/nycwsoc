@@ -11,6 +11,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { DataStore } from '../services/DataStore';
 import { Team, Game, League } from '../types';
+import RequestNotificationBadge from '../components/RequestNotificationBadge';
 import {
   globalStyles,
   buttonStyles,
@@ -221,8 +222,26 @@ const HomeScreen = ({ navigation }: any) => {
       }
     >
       <View style={headerStyles.welcomeHeader}>
-        <Text style={headerStyles.welcomeText}>Welcome back,</Text>
-        <Text style={headerStyles.welcomeUserName}>{user?.name}! ⚽</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <View style={{ flex: 1 }}>
+            <Text style={headerStyles.welcomeText}>Welcome back,</Text>
+            <Text style={headerStyles.welcomeUserName}>{user?.name}! ⚽</Text>
+          </View>
+          
+          {/* Notification badges */}
+          <View style={{ flexDirection: 'column', alignItems: 'flex-end' }}>
+            {user && (user.role === 'admin' || user.role === 'super_admin') && (
+              <RequestNotificationBadge
+                type="admin"
+                onPress={() => navigation.navigate('AdminRequests')}
+              />
+            )}
+            <RequestNotificationBadge
+              type="captain"
+              onPress={() => navigation.navigate('TeamRequests')}
+            />
+          </View>
+        </View>
       </View>
 
       {/* Quick Stats */}
@@ -269,12 +288,14 @@ const HomeScreen = ({ navigation }: any) => {
         {upcomingGames.length === 0 ? (
           <View style={globalStyles.emptyState}>
             <Text style={globalStyles.emptyText}>No upcoming games</Text>
-            <TouchableOpacity 
-              style={buttonStyles.primary}
-              onPress={() => navigation.navigate('Leagues')}
-            >
-              <Text style={buttonStyles.primaryText}>Join a League</Text>
-            </TouchableOpacity>
+            {teams.length === 0 && (
+              <TouchableOpacity 
+                style={buttonStyles.primary}
+                onPress={() => navigation.navigate('Leagues')}
+              >
+                <Text style={buttonStyles.primaryText}>Join a League</Text>
+              </TouchableOpacity>
+            )}
           </View>
         ) : (
           upcomingGames.map(game => (

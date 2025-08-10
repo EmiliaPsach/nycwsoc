@@ -12,6 +12,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { DataStore } from '../services/DataStore';
 import { Team, User, Game, League } from '../types';
+import ProfilePicture from '../components/ProfilePicture';
 import {
   globalStyles,
   cardStyles,
@@ -44,6 +45,24 @@ const TeamDetailScreen = ({ route, navigation }: any) => {
       if (!teamData) {
         Alert.alert('Error', 'Team not found');
         navigation.goBack();
+        return;
+      }
+
+      // Check if current user is a member of this team
+      const isTeamMember = user && teamData.players.includes(user.id);
+      const isAdmin = user && (user.role === 'admin' || user.role === 'super_admin');
+      
+      if (!isTeamMember && !isAdmin) {
+        Alert.alert(
+          'Access Restricted',
+          'You can only view details for teams you are a member of.',
+          [
+            {
+              text: 'OK',
+              onPress: () => navigation.goBack(),
+            },
+          ]
+        );
         return;
       }
 
@@ -141,10 +160,11 @@ const TeamDetailScreen = ({ route, navigation }: any) => {
     
     return (
       <View style={[cardStyles.compactCard, {flexDirection: 'row', alignItems: 'center', ...shadows.button}, isCurrentUser && {borderWidth: 2, borderColor: colors.primary}]}>
-        <View style={{width: 50, height: 50, borderRadius: 25, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center', marginRight: spacing.md}}>
-          <Text style={{color: colors.text.inverse, fontSize: typography.size.md, fontWeight: typography.weight.bold}}>
-            {player.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-          </Text>
+        <View style={{ marginRight: spacing.md }}>
+          <ProfilePicture
+            user={player}
+            size={50}
+          />
         </View>
         
         <View style={{flex: 1}}>
@@ -156,15 +176,6 @@ const TeamDetailScreen = ({ route, navigation }: any) => {
               <View style={{paddingHorizontal: spacing.sm, paddingVertical: 2, borderRadius: borderRadius.md, backgroundColor: '#FFD700'}}>
                 <Text style={{fontSize: typography.size.xs, fontWeight: typography.weight.bold, color: '#B8860B'}}>👑 Captain</Text>
               </View>
-            )}
-          </View>
-          
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            {player.skillLevel && (
-              <Text style={[textStyles.small, {marginRight: spacing.sm}]}>{player.skillLevel}</Text>
-            )}
-            {player.jerseySize && (
-              <Text style={[textStyles.small, {marginRight: spacing.sm}]}>• {player.jerseySize}</Text>
             )}
           </View>
         </View>

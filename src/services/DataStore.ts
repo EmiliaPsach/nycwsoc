@@ -346,11 +346,8 @@ export class DataStore {
   }
 
   async getTeamsForUser(userId: string): Promise<Team[]> {
-    const user = await this.getUser(userId);
-    if (!user) return [];
-    
     const teams = await this.getStoredData<Team[]>(this.TEAMS_KEY) || [];
-    return teams.filter(t => user.teams.includes(t.id) && t.isActive);
+    return teams.filter(t => t.players.includes(userId) && t.isActive);
   }
 
 
@@ -563,6 +560,232 @@ export class DataStore {
       return logs;
     } catch (error) {
       console.error('Error getting reminder logs:', error);
+      return [];
+    }
+  }
+
+  // Enhanced Registration System Methods
+  private TEAM_JOIN_REQUESTS_KEY = 'team_join_requests';
+  private TEAM_CREATION_REQUESTS_KEY = 'team_creation_requests';
+
+  async createTeamJoinRequest(request: Omit<TeamJoinRequest, 'id'>): Promise<TeamJoinRequest> {
+    try {
+      const requests = await this.getStoredData<TeamJoinRequest[]>(this.TEAM_JOIN_REQUESTS_KEY) || [];
+      
+      const newRequest: TeamJoinRequest = {
+        ...request,
+        id: `tjr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      };
+      
+      requests.push(newRequest);
+      await this.setStoredData(this.TEAM_JOIN_REQUESTS_KEY, requests);
+      return newRequest;
+    } catch (error) {
+      console.error('Error creating team join request:', error);
+      throw error;
+    }
+  }
+
+  async createTeamCreationRequest(request: Omit<TeamCreationRequest, 'id'>): Promise<TeamCreationRequest> {
+    try {
+      const requests = await this.getStoredData<TeamCreationRequest[]>(this.TEAM_CREATION_REQUESTS_KEY) || [];
+      
+      const newRequest: TeamCreationRequest = {
+        ...request,
+        id: `tcr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      };
+      
+      requests.push(newRequest);
+      await this.setStoredData(this.TEAM_CREATION_REQUESTS_KEY, requests);
+      return newRequest;
+    } catch (error) {
+      console.error('Error creating team creation request:', error);
+      throw error;
+    }
+  }
+
+  async getTeamJoinRequestsForCaptain(captainUserId: string): Promise<TeamJoinRequest[]> {
+    try {
+      const requests = await this.getStoredData<TeamJoinRequest[]>(this.TEAM_JOIN_REQUESTS_KEY) || [];
+      const teams = await this.getStoredData<Team[]>(this.TEAMS_KEY) || [];
+      
+      // Find teams where the user is captain
+      const captainTeams = teams.filter(team => team.captain === captainUserId);
+      const captainTeamIds = captainTeams.map(team => team.id);
+      
+      // Return pending requests for captain's teams
+      return requests.filter(request => 
+        captainTeamIds.includes(request.teamId) && request.status === 'Pending'
+      );
+    } catch (error) {
+      console.error('Error getting team join requests for captain:', error);
+      return [];
+    }
+  }
+
+  async getTeamCreationRequestsForAdmin(): Promise<TeamCreationRequest[]> {
+    try {
+      const requests = await this.getStoredData<TeamCreationRequest[]>(this.TEAM_CREATION_REQUESTS_KEY) || [];
+      return requests.filter(request => request.status === 'Pending');
+    } catch (error) {
+      console.error('Error getting team creation requests for admin:', error);
+      return [];
+    }
+  }
+
+  async getTeamJoinRequestsForUser(userId: string): Promise<TeamJoinRequest[]> {
+    try {
+      const requests = await this.getStoredData<TeamJoinRequest[]>(this.TEAM_JOIN_REQUESTS_KEY) || [];
+      return requests.filter(request => request.userId === userId);
+    } catch (error) {
+      console.error('Error getting team join requests for user:', error);
+      return [];
+    }
+  }
+
+  async getTeamCreationRequestsForUser(userId: string): Promise<TeamCreationRequest[]> {
+    try {
+      const requests = await this.getStoredData<TeamCreationRequest[]>(this.TEAM_CREATION_REQUESTS_KEY) || [];
+      return requests.filter(request => request.userId === userId);
+    } catch (error) {
+      console.error('Error getting team creation requests for user:', error);
+      return [];
+    }
+  }
+
+  async approveTeamJoinRequest(requestId: string, reviewerId: string): Promise<void> {
+    try {
+      const requests = await this.getStoredData<TeamJoinRequest[]>(this.TEAM_JOIN_REQUESTS_KEY) || [];
+      const request = requests.find(r => r.id === requestId);
+      
+      if (!request) {
+        throw new Error('Team join request not found');
+      }
+
+      // Update request status
+      request.status = 'Approved';
+      request.reviewedAt = new Date().toISOString();
+      request.reviewedBy = reviewerId;
+
+      // Add user to team
+      const teams = await this.getStoredData<Team[]>(this.TEAMS_KEY) || [];
+      const team = teams.find(t => t.id === request.teamId);
+      
+      if (team && !team.players.includes(request.userId)) {
+        team.players.push(request.userId);
+        await this.setStoredData(this.TEAMS_KEY, teams);
+      }
+
+      // Update user's teams list
+      const users = await this.getStoredData<User[]>(this.USERS_KEY) || [];
+      const user = users.find(u => u.id === request.userId);
+      
+      if (user && !user.teams.includes(request.teamId)) {
+        user.teams.push(request.teamId);
+        await this.setStoredData(this.USERS_KEY, users);
+      }
+
+      await this.setStoredData(this.TEAM_JOIN_REQUESTS_KEY, requests);
+    } catch (error) {
+      console.error('Error approving team join request:', error);
+      throw error;
+    }
+  }
+
+  async rejectTeamJoinRequest(requestId: string, reviewerId: string): Promise<void> {
+    try {
+      const requests = await this.getStoredData<TeamJoinRequest[]>(this.TEAM_JOIN_REQUESTS_KEY) || [];
+      const request = requests.find(r => r.id === requestId);
+      
+      if (!request) {
+        throw new Error('Team join request not found');
+      }
+
+      request.status = 'Rejected';
+      request.reviewedAt = new Date().toISOString();
+      request.reviewedBy = reviewerId;
+
+      await this.setStoredData(this.TEAM_JOIN_REQUESTS_KEY, requests);
+    } catch (error) {
+      console.error('Error rejecting team join request:', error);
+      throw error;
+    }
+  }
+
+  async approveTeamCreationRequest(requestId: string, reviewerId: string): Promise<Team> {
+    try {
+      const requests = await this.getStoredData<TeamCreationRequest[]>(this.TEAM_CREATION_REQUESTS_KEY) || [];
+      const request = requests.find(r => r.id === requestId);
+      
+      if (!request) {
+        throw new Error('Team creation request not found');
+      }
+
+      // Create the new team
+      const newTeam: Team = {
+        id: `team_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        name: request.teamName,
+        leagueId: request.leagueId,
+        players: [request.userId], // Creator becomes first player
+        captain: request.userId,
+        createdAt: new Date().toISOString(),
+        isActive: true,
+        description: request.teamDescription,
+      };
+
+      // Add team to storage
+      const teams = await this.getStoredData<Team[]>(this.TEAMS_KEY) || [];
+      teams.push(newTeam);
+      await this.setStoredData(this.TEAMS_KEY, teams);
+
+      // Update user's teams list
+      const users = await this.getStoredData<User[]>(this.USERS_KEY) || [];
+      const user = users.find(u => u.id === request.userId);
+      
+      if (user && !user.teams.includes(newTeam.id)) {
+        user.teams.push(newTeam.id);
+        await this.setStoredData(this.USERS_KEY, users);
+      }
+
+      // Update request status
+      request.status = 'Approved';
+      request.reviewedAt = new Date().toISOString();
+      request.reviewedBy = reviewerId;
+      await this.setStoredData(this.TEAM_CREATION_REQUESTS_KEY, requests);
+
+      return newTeam;
+    } catch (error) {
+      console.error('Error approving team creation request:', error);
+      throw error;
+    }
+  }
+
+  async rejectTeamCreationRequest(requestId: string, reviewerId: string): Promise<void> {
+    try {
+      const requests = await this.getStoredData<TeamCreationRequest[]>(this.TEAM_CREATION_REQUESTS_KEY) || [];
+      const request = requests.find(r => r.id === requestId);
+      
+      if (!request) {
+        throw new Error('Team creation request not found');
+      }
+
+      request.status = 'Rejected';
+      request.reviewedAt = new Date().toISOString();
+      request.reviewedBy = reviewerId;
+
+      await this.setStoredData(this.TEAM_CREATION_REQUESTS_KEY, requests);
+    } catch (error) {
+      console.error('Error rejecting team creation request:', error);
+      throw error;
+    }
+  }
+
+  async getTeamsInLeague(leagueId: string): Promise<Team[]> {
+    try {
+      const teams = await this.getStoredData<Team[]>(this.TEAMS_KEY) || [];
+      return teams.filter(team => team.leagueId === leagueId);
+    } catch (error) {
+      console.error('Error getting teams in league:', error);
       return [];
     }
   }

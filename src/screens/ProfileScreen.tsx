@@ -13,6 +13,8 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { DataStore } from '../services/DataStore';
 import { User } from '../types';
+import ProfilePicture from '../components/ProfilePicture';
+import ImagePickerHelper from '../utils/ImagePickerHelper';
 import {
   globalStyles,
   headerStyles,
@@ -70,6 +72,36 @@ const ProfileScreen = () => {
   const confirmLogout = () => {
     logout();
     setConfirmLogoutVisible(false);
+  };
+
+  const handleProfilePictureChange = async () => {
+    if (!user) return;
+
+    try {
+      const result = await ImagePickerHelper.showImagePicker();
+      
+      if (result.uri) {
+        // Create updated user with new profile picture
+        const updatedUser = {
+          ...user,
+          profilePicture: result.uri,
+        };
+
+        // Save directly to data store
+        await dataStore.updateUser(updatedUser);
+        
+        // Update both local states
+        setUser(updatedUser);
+        setEditedUser(updatedUser);
+        
+        Alert.alert('Success', 'Profile picture updated successfully!');
+      } else if (result.error) {
+        Alert.alert('Error', result.error);
+      }
+    } catch (error) {
+      console.error('Error updating profile picture:', error);
+      Alert.alert('Error', 'Failed to update profile picture. Please try again.');
+    }
   };
 
   if (!user || !editedUser) {
@@ -195,15 +227,12 @@ const ProfileScreen = () => {
 
       <ScrollView style={{flex: 1}} showsVerticalScrollIndicator={false}>
         <View style={{alignItems: 'center', padding: spacing.xxxl, backgroundColor: colors.background.card}}>
-          <View style={{width: 80, height: 80, borderRadius: 40, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center', marginBottom: spacing.md}}>
-            <Text style={{color: colors.text.inverse, fontSize: typography.size.xxl, fontWeight: typography.weight.bold}}>
-              {user.name
-                .split(' ')
-                .map((n) => n[0])
-                .join('')
-                .toUpperCase()}
-            </Text>
-          </View>
+          <ProfilePicture
+            user={editedUser}
+            size={100}
+            onPress={handleProfilePictureChange}
+            showEditIcon={true}
+          />
           <Text style={[textStyles.title, {fontSize: typography.size.xl, marginBottom: spacing.xs}]}>{user.name}</Text>
           <Text style={textStyles.subtitle}>{user.email}</Text>
         </View>

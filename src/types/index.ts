@@ -11,6 +11,7 @@ export interface User {
   isActive: boolean;
   phoneNumber?: string;
   role?: 'player' | 'admin' | 'super_admin';
+  profilePicture?: string;
 }
 
 export interface Team {
@@ -100,6 +101,29 @@ export interface FreeAgentRegistration {
   createdAt: string;
 }
 
+export interface TeamJoinRequest {
+  id: string;
+  userId: string;
+  teamId: string;
+  leagueId: string;
+  status: 'Pending' | 'Approved' | 'Rejected';
+  requestedAt: string;
+  reviewedAt?: string;
+  reviewedBy?: string; // captain or admin ID
+}
+
+export interface TeamCreationRequest {
+  id: string;
+  userId: string; // person creating the team (will become captain)
+  leagueId: string;
+  teamName: string;
+  teamDescription?: string;
+  status: 'Pending' | 'Approved' | 'Rejected';
+  requestedAt: string;
+  reviewedAt?: string;
+  reviewedBy?: string; // admin ID
+}
+
 export type NavigationParamList = {
   Login: undefined;
   Register: undefined;
@@ -109,4 +133,5 @@ export type NavigationParamList = {
   Profile: undefined;
   TeamDetail: { teamId: string };
   GameDetail: { gameId: string; teamId?: string };
+  LeagueRegistration: { league: League };
 };
