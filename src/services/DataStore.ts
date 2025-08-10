@@ -5,9 +5,9 @@ import {
   League, 
   Game, 
   Poll, 
-  Notification, 
+  TeamJoinRequest, 
   FreeAgentRegistration, 
-  TeamRegistration 
+  TeamCreationRequest 
 } from '../types';
 
 export class DataStore {
@@ -118,6 +118,18 @@ export class DataStore {
         teams: ['team2'],
         createdAt: new Date().toISOString(),
         isActive: true
+      },
+      {
+        id: 'admin1',
+        email: 'admin@nycwsoc.com',
+        name: 'League Admin',
+        zipCode: '10001',
+        jerseySize: 'L',
+        skillLevel: 'Advanced',
+        teams: [],
+        createdAt: new Date().toISOString(),
+        isActive: true,
+        role: 'admin'
       }
     ];
 
@@ -650,6 +662,122 @@ export class DataStore {
     } catch (error) {
       console.error('Error getting team creation requests for user:', error);
       return [];
+    }
+  }
+
+  async getAllTeams(): Promise<Team[]> {
+    try {
+      return await this.getStoredData<Team[]>(this.TEAMS_KEY) || [];
+    } catch (error) {
+      console.error('Error getting all teams:', error);
+      return [];
+    }
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    try {
+      return await this.getStoredData<User[]>(this.USERS_KEY) || [];
+    } catch (error) {
+      console.error('Error getting all users:', error);
+      return [];
+    }
+  }
+
+  async getAllFreeAgentRegistrations(): Promise<FreeAgentRegistration[]> {
+    try {
+      return await this.getStoredData<FreeAgentRegistration[]>(this.FREE_AGENT_REGISTRATIONS_KEY) || [];
+    } catch (error) {
+      console.error('Error getting all free agent registrations:', error);
+      return [];
+    }
+  }
+
+  async getAllGames(): Promise<Game[]> {
+    try {
+      return await this.getStoredData<Game[]>(this.GAMES_KEY) || [];
+    } catch (error) {
+      console.error('Error getting all games:', error);
+      return [];
+    }
+  }
+
+  async createLeague(league: League): Promise<void> {
+    try {
+      const leagues = await this.getStoredData<League[]>(this.LEAGUES_KEY) || [];
+      leagues.push(league);
+      await this.setStoredData(this.LEAGUES_KEY, leagues);
+    } catch (error) {
+      console.error('Error creating league:', error);
+      throw error;
+    }
+  }
+
+  async createTeamDirectly(team: Team): Promise<void> {
+    try {
+      // Add team to storage
+      const teams = await this.getStoredData<Team[]>(this.TEAMS_KEY) || [];
+      teams.push(team);
+      await this.setStoredData(this.TEAMS_KEY, teams);
+
+      // Update captain's teams list
+      const users = await this.getStoredData<User[]>(this.USERS_KEY) || [];
+      const captain = users.find(u => u.id === team.captain);
+      
+      if (captain && !captain.teams.includes(team.id)) {
+        captain.teams.push(team.id);
+        await this.setStoredData(this.USERS_KEY, users);
+      }
+    } catch (error) {
+      console.error('Error creating team directly:', error);
+      throw error;
+    }
+  }
+
+  async assignFreeAgentToTeam(freeAgentId: string, teamId: string): Promise<void> {
+    try {
+      const freeAgents = await this.getStoredData<FreeAgentRegistration[]>(this.FREE_AGENT_REGISTRATIONS_KEY) || [];
+      const freeAgentIndex = freeAgents.findIndex(fa => fa.id === freeAgentId);
+      
+      if (freeAgentIndex === -1) {
+        throw new Error('Free agent registration not found');
+      }
+
+      const freeAgent = freeAgents[freeAgentIndex];
+      
+      // Update free agent status
+      freeAgent.status = 'Assigned';
+      freeAgent.assignedTeamId = teamId;
+      
+      // Add user to team
+      const teams = await this.getStoredData<Team[]>(this.TEAMS_KEY) || [];
+      const team = teams.find(t => t.id === teamId);
+      
+      if (team && !team.players.includes(freeAgent.userId)) {
+        team.players.push(freeAgent.userId);
+        await this.setStoredData(this.TEAMS_KEY, teams);
+      }
+
+      await this.setStoredData(this.FREE_AGENT_REGISTRATIONS_KEY, freeAgents);
+    } catch (error) {
+      console.error('Error assigning free agent to team:', error);
+      throw error;
+    }
+  }
+
+  async rejectFreeAgent(freeAgentId: string): Promise<void> {
+    try {
+      const freeAgents = await this.getStoredData<FreeAgentRegistration[]>(this.FREE_AGENT_REGISTRATIONS_KEY) || [];
+      const freeAgent = freeAgents.find(fa => fa.id === freeAgentId);
+      
+      if (!freeAgent) {
+        throw new Error('Free agent registration not found');
+      }
+
+      freeAgent.status = 'Rejected';
+      await this.setStoredData(this.FREE_AGENT_REGISTRATIONS_KEY, freeAgents);
+    } catch (error) {
+      console.error('Error rejecting free agent:', error);
+      throw error;
     }
   }
 

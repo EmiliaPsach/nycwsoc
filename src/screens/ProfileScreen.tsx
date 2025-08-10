@@ -29,7 +29,7 @@ import {
   screenConfig
 } from '../styles';
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ navigation }: any) => {
   const { user, logout, setUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [editedUser, setEditedUser] = useState<User | null>(null);
@@ -363,6 +363,15 @@ const ProfileScreen = () => {
           >
             <Text style={[textStyles.body, {color: colors.primary, fontWeight: typography.weight.medium}]}>Terms of Service</Text>
           </TouchableOpacity>
+          
+          {(user.role === 'admin' || user.role === 'super_admin') && (
+            <TouchableOpacity 
+              style={{paddingVertical: spacing.lg, paddingHorizontal: spacing.lg, borderBottomWidth: 1, borderBottomColor: colors.border.light}}
+              onPress={() => navigation.navigate('AdminDashboard')}
+            >
+              <Text style={[textStyles.body, {color: colors.secondary, fontWeight: typography.weight.semiBold}]}>🛠️ Admin Dashboard</Text>
+            </TouchableOpacity>
+          )}
           
           <TouchableOpacity 
             style={{paddingVertical: spacing.lg, paddingHorizontal: spacing.lg}}

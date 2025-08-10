@@ -1,12 +1,11 @@
-// screens/AdminRequestsScreen.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
-  Alert,
   RefreshControl,
+  Alert,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
@@ -15,10 +14,11 @@ import { TeamCreationRequest, User, League } from '../types';
 import ProfilePicture from '../components/ProfilePicture';
 import {
   globalStyles,
+  cardStyles,
   headerStyles,
   textStyles,
   buttonStyles,
-  cardStyles,
+  statusStyles,
   colors,
   spacing,
   typography,
@@ -27,77 +27,69 @@ import {
 
 const AdminRequestsScreen = ({ navigation }: any) => {
   const { user } = useAuth();
-  const [requests, setRequests] = useState<TeamCreationRequest[]>([]);
-  const [requestUsers, setRequestUsers] = useState<{[key: string]: User}>({});
-  const [leagues, setLeagues] = useState<{[key: string]: League}>({});
+  const [teamRequests, setTeamRequests] = useState<TeamCreationRequest[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [leagues, setLeagues] = useState<League[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const dataStore = new DataStore();
 
-  const loadRequests = async () => {
-    if (!user) return;
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [])
+  );
 
+  const loadData = async () => {
     try {
-      const pendingRequests = await dataStore.getTeamCreationRequestsForAdmin();
-      setRequests(pendingRequests);
-
-      // Load user and league data for each request
-      const users: {[key: string]: User} = {};
-      const leagueData: {[key: string]: League} = {};
-
-      for (const request of pendingRequests) {
-        if (!users[request.userId]) {
-          const userData = await dataStore.getUser(request.userId);
-          if (userData) users[request.userId] = userData;
-        }
-
-        if (!leagueData[request.leagueId]) {
-          const league = await dataStore.getLeague(request.leagueId);
-          if (league) leagueData[request.leagueId] = league;
-        }
-      }
-
-      setRequestUsers(users);
-      setLeagues(leagueData);
+      const [requests, allUsers, allLeagues] = await Promise.all([
+        dataStore.getTeamCreationRequestsForAdmin(),
+        dataStore.getAllUsers(),
+        dataStore.getLeagues(),
+      ]);
+      
+      setTeamRequests(requests);
+      setUsers(allUsers);
+      setLeagues(allLeagues);
     } catch (error) {
-      console.error('Error loading team creation requests:', error);
-      Alert.alert('Error', 'Failed to load team creation requests');
+      console.error('Error loading admin requests data:', error);
+      Alert.alert('Error', 'Failed to load requests data');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      loadRequests();
-    }, [user])
-  );
-
   const onRefresh = () => {
     setRefreshing(true);
-    loadRequests();
+    loadData();
   };
 
-  const handleApproveRequest = async (request: TeamCreationRequest) => {
-    if (!user) return;
+  const getUserById = (userId: string): User | undefined => {
+    return users.find(u => u.id === userId);
+  };
 
+  const getLeagueById = (leagueId: string): League | undefined => {
+    return leagues.find(l => l.id === leagueId);
+  };
+
+  const approveTeamRequest = async (request: TeamCreationRequest) => {
+    const requester = getUserById(request.userId);
     Alert.alert(
       'Approve Team Creation',
-      `Are you sure you want to approve the creation of "${request.teamName}" by ${requestUsers[request.userId]?.name || 'this user'}?`,
+      `Approve "${request.teamName}" by ${requester?.name}?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Approve',
-          style: 'default',
           onPress: async () => {
             try {
-              await dataStore.approveTeamCreationRequest(request.id, user.id);
-              Alert.alert('Success', `Team "${request.teamName}" has been created and approved!`);
-              loadRequests();
+              await dataStore.approveTeamCreationRequest(request.id, user!.id);
+              loadData();
+              Alert.alert('Success', `Team "${request.teamName}" has been approved and created!`);
             } catch (error) {
-              console.error('Error approving team creation:', error);
-              Alert.alert('Error', 'Failed to approve team creation. Please try again.');
+              console.error('Error approving team request:', error);
+              Alert.alert('Error', 'Failed to approve team request. Please try again.');
             }
           },
         },
@@ -105,12 +97,11 @@ const AdminRequestsScreen = ({ navigation }: any) => {
     );
   };
 
-  const handleRejectRequest = async (request: TeamCreationRequest) => {
-    if (!user) return;
-
+  const rejectTeamRequest = async (request: TeamCreationRequest) => {
+    const requester = getUserById(request.userId);
     Alert.alert(
       'Reject Team Creation',
-      `Are you sure you want to reject the creation of "${request.teamName}"?`,
+      `Reject "${request.teamName}" by ${requester?.name}?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -118,12 +109,12 @@ const AdminRequestsScreen = ({ navigation }: any) => {
           style: 'destructive',
           onPress: async () => {
             try {
-              await dataStore.rejectTeamCreationRequest(request.id, user.id);
-              Alert.alert('Request Rejected', 'The team creation request has been rejected.');
-              loadRequests();
+              await dataStore.rejectTeamCreationRequest(request.id, user!.id);
+              loadData();
+              Alert.alert('Success', 'Team creation request rejected.');
             } catch (error) {
-              console.error('Error rejecting team creation:', error);
-              Alert.alert('Error', 'Failed to reject request. Please try again.');
+              console.error('Error rejecting team request:', error);
+              Alert.alert('Error', 'Failed to reject team request. Please try again.');
             }
           },
         },
@@ -131,89 +122,81 @@ const AdminRequestsScreen = ({ navigation }: any) => {
     );
   };
 
-  const RequestCard = ({ request }: { request: TeamCreationRequest }) => {
-    const requestUser = requestUsers[request.userId];
-    const league = leagues[request.leagueId];
+  const TeamRequestCard = ({ request }: { request: TeamCreationRequest }) => {
+    const requester = getUserById(request.userId);
+    const league = getLeagueById(request.leagueId);
 
-    if (!requestUser || !league) return null;
+    if (!requester || !league) return null;
 
     return (
       <View style={cardStyles.card}>
-        <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: spacing.md }}>
-          <ProfilePicture user={requestUser} size={50} />
-          <View style={{ flex: 1, marginLeft: spacing.md }}>
-            <Text style={[textStyles.title, { fontSize: typography.size.lg, marginBottom: spacing.xs }]}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md }}>
+          <ProfilePicture user={requester} size={60} />
+          <View style={{ marginLeft: spacing.md, flex: 1 }}>
+            <Text style={[textStyles.title, { fontSize: typography.size.lg }]}>
               {request.teamName}
             </Text>
-            <Text style={[textStyles.body, { marginBottom: spacing.xs }]}>
-              Requested by: {requestUser.name}
+            <Text style={[textStyles.body, { color: colors.text.secondary }]}>
+              Requested by {requester.name}
             </Text>
-            <Text style={[textStyles.caption, { marginBottom: spacing.xs }]}>
-              League: {league.name}
+            <Text style={[textStyles.caption, { color: colors.primary }]}>
+              {league.name}
             </Text>
-            {requestUser.skillLevel && (
-              <Text style={[textStyles.small, { color: colors.primary }]}>
-                Captain Skill Level: {requestUser.skillLevel}
-              </Text>
-            )}
           </View>
         </View>
 
         {request.teamDescription && (
-          <View style={{ marginBottom: spacing.md, padding: spacing.md, backgroundColor: colors.background.main, borderRadius: 8 }}>
-            <Text style={[textStyles.small, { fontWeight: typography.weight.semiBold, marginBottom: spacing.xs }]}>
+          <View style={{ marginBottom: spacing.md }}>
+            <Text style={[textStyles.body, { fontWeight: typography.weight.semiBold, marginBottom: spacing.xs }]}>
               Team Description:
             </Text>
-            <Text style={[textStyles.small, { color: colors.text.secondary }]}>
+            <Text style={[textStyles.body, { color: colors.text.secondary }]}>
               {request.teamDescription}
             </Text>
           </View>
         )}
 
-        <View style={{ marginBottom: spacing.md }}>
-          <Text style={[textStyles.small, { color: colors.text.secondary }]}>
-            Requested: {new Date(request.requestedAt).toLocaleDateString()}
-          </Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: spacing.md }}>
+          {requester.skillLevel && (
+            <View style={[statusStyles.badge, { backgroundColor: colors.status.scheduled, marginRight: spacing.sm }]}>
+              <Text style={statusStyles.badgeText}>{requester.skillLevel}</Text>
+            </View>
+          )}
+          <View style={[statusStyles.badge, { backgroundColor: colors.status.inProgress }]}>
+            <Text style={statusStyles.badgeText}>Captain</Text>
+          </View>
         </View>
 
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <TouchableOpacity
-            style={[buttonStyles.secondary, { flex: 1, marginRight: spacing.sm }]}
-            onPress={() => handleRejectRequest(request)}
-          >
-            <Text style={buttonStyles.secondaryText}>Reject</Text>
-          </TouchableOpacity>
+        <Text style={[textStyles.caption, { color: colors.text.secondary, marginBottom: spacing.md }]}>
+          Requested: {new Date(request.requestedAt).toLocaleDateString()}
+        </Text>
 
+        <View style={{ flexDirection: 'row', gap: spacing.sm }}>
           <TouchableOpacity
-            style={[buttonStyles.primary, { flex: 1, marginLeft: spacing.sm }]}
-            onPress={() => handleApproveRequest(request)}
+            style={[buttonStyles.secondary, { flex: 1, paddingVertical: spacing.sm }]}
+            onPress={() => rejectTeamRequest(request)}
           >
-            <Text style={buttonStyles.primaryText}>Approve & Create Team</Text>
+            <Text style={[buttonStyles.secondaryText, { fontSize: typography.size.sm }]}>
+              Reject
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[buttonStyles.primary, { flex: 1, paddingVertical: spacing.sm }]}
+            onPress={() => approveTeamRequest(request)}
+          >
+            <Text style={[buttonStyles.primaryText, { fontSize: typography.size.sm }]}>
+              Approve & Create
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
     );
   };
 
-  // Check if user is admin
-  if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
-    return (
-      <View style={globalStyles.errorContainer}>
-        <Text style={globalStyles.errorText}>Access denied. Admin privileges required.</Text>
-        <TouchableOpacity
-          style={buttonStyles.primary}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={buttonStyles.primaryText}>Go Back</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
   if (loading) {
     return (
       <View style={globalStyles.loadingContainer}>
-        <Text style={globalStyles.loadingText}>Loading admin requests...</Text>
+        <Text style={globalStyles.loadingText}>Loading team requests...</Text>
       </View>
     );
   }
@@ -221,39 +204,28 @@ const AdminRequestsScreen = ({ navigation }: any) => {
   return (
     <View style={[globalStyles.container, { paddingTop: screenConfig.topPadding }]}>
       <View style={headerStyles.header}>
-        <Text style={headerStyles.headerTitle}>Team Creation Requests</Text>
-        <Text style={[headerStyles.headerSubtitle, { marginTop: spacing.xs }]}>
-          Admin Panel
-        </Text>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Text style={[textStyles.body, { color: colors.primary }]}>← Back</Text>
+        </TouchableOpacity>
+        <Text style={headerStyles.headerTitle}>Team Requests ({teamRequests.length})</Text>
+        <View style={{ width: 50 }} />
       </View>
 
       <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{ padding: spacing.xl }}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        style={{ flex: 1, padding: spacing.xl }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        {requests.length === 0 ? (
+        {teamRequests.length === 0 ? (
           <View style={globalStyles.emptyState}>
-            <Text style={{ fontSize: 64, marginBottom: spacing.lg }}>⚡</Text>
-            <Text style={[textStyles.title, { marginBottom: spacing.sm, fontSize: typography.size.xl }]}>
-              No Pending Team Creations
-            </Text>
-            <Text style={[globalStyles.emptyText, { lineHeight: typography.size.md * 1.5 }]}>
-              When players request to create new teams, you'll review and approve them here.
+            <Text style={globalStyles.emptyText}>No pending team requests</Text>
+            <Text style={[textStyles.caption, { marginTop: spacing.sm, textAlign: 'center' }]}>
+              All team creation requests have been processed.
             </Text>
           </View>
         ) : (
-          <>
-            <Text style={[textStyles.body, { marginBottom: spacing.lg, color: colors.text.secondary }]}>
-              You have {requests.length} pending team creation request{requests.length !== 1 ? 's' : ''} to review.
-            </Text>
-            
-            {requests.map(request => (
-              <RequestCard key={request.id} request={request} />
-            ))}
-          </>
+          teamRequests.map(request => (
+            <TeamRequestCard key={request.id} request={request} />
+          ))
         )}
       </ScrollView>
     </View>
