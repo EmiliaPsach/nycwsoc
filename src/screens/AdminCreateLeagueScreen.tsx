@@ -41,7 +41,12 @@ const AdminCreateLeagueScreen = ({ navigation }: any) => {
     earlyBirdDeadline: '',
     startDate: '',
     endDate: '',
+    // Scheduling fields
+    availableFields: '2',
+    seasonWeeks: '12',
   });
+  const [gameStartTimes, setGameStartTimes] = useState<string[]>(['8:30 PM']);
+  const [newStartTime, setNewStartTime] = useState('');
   const dataStore = new DataStore();
 
   const createLeague = async () => {
@@ -72,6 +77,10 @@ const AdminCreateLeagueScreen = ({ navigation }: any) => {
         endDate: formData.endDate || new Date(Date.now() + 135 * 24 * 60 * 60 * 1000).toISOString(),
         isActive: true,
         createdAt: new Date().toISOString(),
+        // Scheduling fields
+        availableFields: parseInt(formData.availableFields) || 2,
+        gameStartTimes: gameStartTimes.length > 0 ? gameStartTimes : [formData.time.trim() || '10:00 AM'],
+        seasonWeeks: parseInt(formData.seasonWeeks) || 12,
       };
 
       await dataStore.createLeague(newLeague);
@@ -83,6 +92,21 @@ const AdminCreateLeagueScreen = ({ navigation }: any) => {
       Alert.alert('Error', 'Failed to create league. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const addStartTime = () => {
+    if (newStartTime.trim() && !gameStartTimes.includes(newStartTime.trim())) {
+      setGameStartTimes([...gameStartTimes, newStartTime.trim()]);
+      setNewStartTime('');
+    }
+  };
+
+  const removeStartTime = (timeToRemove: string) => {
+    if (gameStartTimes.length > 1) {
+      setGameStartTimes(gameStartTimes.filter(time => time !== timeToRemove));
+    } else {
+      Alert.alert('Error', 'At least one start time is required');
     }
   };
 
@@ -133,9 +157,6 @@ const AdminCreateLeagueScreen = ({ navigation }: any) => {
   return (
     <View style={[globalStyles.container, { paddingTop: screenConfig.topPadding }]}>
       <View style={headerStyles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={[textStyles.body, { color: colors.primary }]}>← Cancel</Text>
-        </TouchableOpacity>
         <Text style={headerStyles.headerTitle}>Create League</Text>
         <View style={{ width: 50 }} />
       </View>
@@ -224,6 +245,66 @@ const AdminCreateLeagueScreen = ({ navigation }: any) => {
               placeholder="120"
               keyboardType="numeric"
             />
+          </View>
+        </View>
+
+        {/* Scheduling Configuration Section */}
+        <View style={{ marginTop: spacing.xl }}>
+          <Text style={[textStyles.subtitle, { marginBottom: spacing.md }]}>Scheduling Configuration</Text>
+          
+          <View style={{ flexDirection: 'row', gap: spacing.md }}>
+            <View style={{ flex: 1 }}>
+              <FormField
+                label="Available Fields"
+                value={formData.availableFields}
+                onChangeText={(text: string) => setFormData({ ...formData, availableFields: text })}
+                placeholder="2"
+                keyboardType="numeric"
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <FormField
+                label="Season Length (Weeks)"
+                value={formData.seasonWeeks}
+                onChangeText={(text: string) => setFormData({ ...formData, seasonWeeks: text })}
+                placeholder="12"
+                keyboardType="numeric"
+              />
+            </View>
+          </View>
+
+          <View style={formStyles.inputContainer}>
+            <Text style={formStyles.label}>Game Start Times</Text>
+            {gameStartTimes.map((time, index) => (
+              <View key={index} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm }}>
+                <Text style={[textStyles.body, { flex: 1, padding: spacing.sm, backgroundColor: colors.background.card, borderRadius: 8 }]}>
+                  {time}
+                </Text>
+                {gameStartTimes.length > 1 && (
+                  <TouchableOpacity 
+                    onPress={() => removeStartTime(time)}
+                    style={{ marginLeft: spacing.sm, padding: spacing.sm }}
+                  >
+                    <Text style={{ color: colors.danger, fontSize: typography.size.lg }}>×</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            ))}
+            
+            <View style={{ flexDirection: 'row', marginTop: spacing.sm }}>
+              <TextInput
+                style={[formStyles.input, { flex: 1, marginRight: spacing.sm }]}
+                value={newStartTime}
+                onChangeText={setNewStartTime}
+                placeholder="e.g., 9:15 PM"
+              />
+              <TouchableOpacity 
+                style={[buttonStyles.secondary, { paddingHorizontal: spacing.md }]}
+                onPress={addStartTime}
+              >
+                <Text style={buttonStyles.secondaryText}>Add</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 

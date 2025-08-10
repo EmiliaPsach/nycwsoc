@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   RefreshControl,
   Alert,
+  TextInput,
+  Modal,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
@@ -19,6 +21,8 @@ import {
   textStyles,
   buttonStyles,
   statusStyles,
+  formStyles,
+  modalStyles,
   colors,
   spacing,
   typography,
@@ -31,6 +35,11 @@ const AdminSchedulesScreen = ({ navigation }: any) => {
   const [teams, setTeams] = useState<Team[]>([]);
   const [leagues, setLeagues] = useState<League[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'upcoming' | 'completed'>('upcoming');
+  const [selectedLeague, setSelectedLeague] = useState<string | null>(null);
+  const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
+  const [searchText, setSearchText] = useState('');
+  const [showLeagueModal, setShowLeagueModal] = useState(false);
+  const [showTeamModal, setShowTeamModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const dataStore = new DataStore();
@@ -77,19 +86,70 @@ const AdminSchedulesScreen = ({ navigation }: any) => {
   };
 
   const getFilteredGames = () => {
+    let filteredGames = games;
     const now = new Date();
+
+    // Filter by status
     switch (selectedFilter) {
       case 'upcoming':
-        return games.filter(game => {
+        filteredGames = filteredGames.filter(game => {
           const gameDate = new Date(game.date);
           return gameDate >= now && game.status !== 'Completed';
-        }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        });
+        break;
       case 'completed':
-        return games.filter(game => game.status === 'Completed')
-          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        filteredGames = filteredGames.filter(game => game.status === 'Completed');
+        break;
       default:
-        return games.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        // 'all' - no status filtering
+        break;
     }
+
+    // Filter by league
+    if (selectedLeague) {
+      filteredGames = filteredGames.filter(game => game.leagueId === selectedLeague);
+    }
+
+    // Filter by team
+    if (selectedTeam) {
+      filteredGames = filteredGames.filter(game => 
+        game.homeTeam === selectedTeam || game.awayTeam === selectedTeam
+      );
+    }
+
+    // Filter by search text (team names or league names)
+    if (searchText.trim()) {
+      const searchLower = searchText.toLowerCase();
+      filteredGames = filteredGames.filter(game => {
+        const homeTeamName = getTeamName(game.homeTeam).toLowerCase();
+        const awayTeamName = getTeamName(game.awayTeam).toLowerCase();
+        const leagueName = getLeagueName(game.leagueId).toLowerCase();
+        
+        return homeTeamName.includes(searchLower) ||
+               awayTeamName.includes(searchLower) ||
+               leagueName.includes(searchLower);
+      });
+    }
+
+    // Sort by date
+    return filteredGames.sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return selectedFilter === 'completed' ? dateB - dateA : dateA - dateB;
+    });
+  };
+
+  const clearFilters = () => {
+    setSelectedLeague(null);
+    setSelectedTeam(null);
+    setSearchText('');
+  };
+
+  const getFilteredTeams = () => {
+    if (selectedLeague) {
+      return teams.filter(team => team.leagueId === selectedLeague && team.isActive);
+    }
+    return teams.filter(team => team.isActive);
   };
 
   const getStatusColor = (status: string) => {
@@ -190,6 +250,132 @@ const AdminSchedulesScreen = ({ navigation }: any) => {
     </TouchableOpacity>
   );
 
+  const LeagueModal = () => (
+    <Modal visible={showLeagueModal} animationType="slide" presentationStyle="pageSheet">
+      <View style={{ flex: 1, backgroundColor: colors.background.main }}>
+        <View style={modalStyles.header}>
+          <TouchableOpacity onPress={() => setShowLeagueModal(false)}>
+            <Text style={[textStyles.body, { color: colors.primary }]}>Cancel</Text>
+          </TouchableOpacity>
+          <Text style={modalStyles.title}>Filter by League</Text>
+          <TouchableOpacity onPress={() => setShowLeagueModal(false)}>
+            <Text style={[textStyles.body, { color: colors.primary }]}>Done</Text>
+          </TouchableOpacity>
+        </View>
+        
+        <ScrollView style={{ flex: 1, padding: spacing.xl }}>
+          <TouchableOpacity 
+            style={[
+              cardStyles.card, 
+              { backgroundColor: !selectedLeague ? colors.primary : colors.background.card }
+            ]}
+            onPress={() => {
+              setSelectedLeague(null);
+              setSelectedTeam(null); // Clear team filter when changing league
+            }}
+          >
+            <Text style={[
+              textStyles.body, 
+              { color: !selectedLeague ? colors.text.inverse : colors.text.primary }
+            ]}>
+              All Leagues
+            </Text>
+          </TouchableOpacity>
+
+          {leagues.map(league => (
+            <TouchableOpacity 
+              key={league.id}
+              style={[
+                cardStyles.card, 
+                { backgroundColor: selectedLeague === league.id ? colors.primary : colors.background.card }
+              ]}
+              onPress={() => {
+                setSelectedLeague(league.id);
+                setSelectedTeam(null); // Clear team filter when changing league
+              }}
+            >
+              <Text style={[
+                textStyles.title, 
+                { 
+                  fontSize: typography.size.md,
+                  color: selectedLeague === league.id ? colors.text.inverse : colors.text.primary 
+                }
+              ]}>
+                {league.name}
+              </Text>
+              <Text style={[
+                textStyles.caption, 
+                { color: selectedLeague === league.id ? colors.text.inverse : colors.text.secondary }
+              ]}>
+                {league.skillLevel} • {league.dayOfWeek}s • {league.location}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+    </Modal>
+  );
+
+  const TeamModal = () => (
+    <Modal visible={showTeamModal} animationType="slide" presentationStyle="pageSheet">
+      <View style={{ flex: 1, backgroundColor: colors.background.main }}>
+        <View style={modalStyles.header}>
+          <TouchableOpacity onPress={() => setShowTeamModal(false)}>
+            <Text style={[textStyles.body, { color: colors.primary }]}>Cancel</Text>
+          </TouchableOpacity>
+          <Text style={modalStyles.title}>Filter by Team</Text>
+          <TouchableOpacity onPress={() => setShowTeamModal(false)}>
+            <Text style={[textStyles.body, { color: colors.primary }]}>Done</Text>
+          </TouchableOpacity>
+        </View>
+        
+        <ScrollView style={{ flex: 1, padding: spacing.xl }}>
+          <TouchableOpacity 
+            style={[
+              cardStyles.card, 
+              { backgroundColor: !selectedTeam ? colors.primary : colors.background.card }
+            ]}
+            onPress={() => setSelectedTeam(null)}
+          >
+            <Text style={[
+              textStyles.body, 
+              { color: !selectedTeam ? colors.text.inverse : colors.text.primary }
+            ]}>
+              All Teams
+            </Text>
+          </TouchableOpacity>
+
+          {getFilteredTeams().map(team => (
+            <TouchableOpacity 
+              key={team.id}
+              style={[
+                cardStyles.card, 
+                { backgroundColor: selectedTeam === team.id ? colors.primary : colors.background.card }
+              ]}
+              onPress={() => setSelectedTeam(team.id)}
+            >
+              <Text style={[
+                textStyles.title, 
+                { 
+                  fontSize: typography.size.md,
+                  color: selectedTeam === team.id ? colors.text.inverse : colors.text.primary 
+                }
+              ]}>
+                {team.name}
+              </Text>
+              <Text style={[
+                textStyles.caption, 
+                { color: selectedTeam === team.id ? colors.text.inverse : colors.text.secondary }
+              ]}>
+                {getLeagueName(team.leagueId)} • {team.players.length} players
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+    </Modal>
+  );
+
   const filteredGames = getFilteredGames();
 
   if (loading) {
@@ -204,10 +390,28 @@ const AdminSchedulesScreen = ({ navigation }: any) => {
     <View style={[globalStyles.container, { paddingTop: screenConfig.topPadding }]}>
       <View style={headerStyles.header}>
         <Text style={headerStyles.headerTitle}>All Schedules</Text>
-        <View style={{ width: 50 }} />
+        <TouchableOpacity onPress={clearFilters}>
+          <Text style={[textStyles.body, { color: colors.primary, fontWeight: typography.weight.semiBold }]}>
+            Clear All
+          </Text>
+        </TouchableOpacity>
       </View>
 
-      <View style={{ paddingHorizontal: spacing.xl, paddingVertical: spacing.md }}>
+      {/* Search Bar */}
+      <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.md }}>
+        <View style={formStyles.inputContainer}>
+          <TextInput
+            style={[formStyles.input, { marginBottom: 0 }]}
+            value={searchText}
+            onChangeText={setSearchText}
+            placeholder="Search by team or league name..."
+            clearButtonMode="while-editing"
+          />
+        </View>
+      </View>
+
+      {/* Status Filters */}
+      <View style={{ paddingHorizontal: spacing.xl, paddingVertical: spacing.sm }}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <FilterButton filter="upcoming" title="Upcoming" />
           <FilterButton filter="completed" title="Completed" />
@@ -215,13 +419,59 @@ const AdminSchedulesScreen = ({ navigation }: any) => {
         </ScrollView>
       </View>
 
+      {/* League and Team Filters */}
+      <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
+        <View style={{ flexDirection: 'row', gap: spacing.md }}>
+          <TouchableOpacity 
+            style={[
+              buttonStyles.secondary, 
+              { flex: 1, paddingVertical: spacing.sm },
+              selectedLeague && { backgroundColor: colors.primary }
+            ]}
+            onPress={() => setShowLeagueModal(true)}
+          >
+            <Text style={[
+              buttonStyles.secondaryText,
+              { fontSize: typography.size.sm },
+              selectedLeague && { color: colors.text.inverse }
+            ]}>
+              {selectedLeague ? getLeagueName(selectedLeague) : 'All Leagues'}
+            </Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[
+              buttonStyles.secondary, 
+              { flex: 1, paddingVertical: spacing.sm },
+              selectedTeam && { backgroundColor: colors.primary }
+            ]}
+            onPress={() => setShowTeamModal(true)}
+          >
+            <Text style={[
+              buttonStyles.secondaryText,
+              { fontSize: typography.size.sm },
+              selectedTeam && { color: colors.text.inverse }
+            ]}>
+              {selectedTeam ? getTeamName(selectedTeam) : 'All Teams'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
       <ScrollView
         style={{ flex: 1, padding: spacing.xl, paddingTop: 0 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        <Text style={[textStyles.caption, { marginBottom: spacing.lg, color: colors.text.secondary }]}>
-          Showing {filteredGames.length} games
-        </Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg }}>
+          <Text style={[textStyles.caption, { color: colors.text.secondary }]}>
+            Showing {filteredGames.length} of {games.length} games
+          </Text>
+          {(selectedLeague || selectedTeam || searchText.trim()) && (
+            <Text style={[textStyles.caption, { color: colors.primary }]}>
+              Filtered
+            </Text>
+          )}
+        </View>
 
         {filteredGames.length === 0 ? (
           <View style={globalStyles.emptyState}>
@@ -235,6 +485,10 @@ const AdminSchedulesScreen = ({ navigation }: any) => {
           ))
         )}
       </ScrollView>
+
+      {/* Filter Modals */}
+      <LeagueModal />
+      <TeamModal />
     </View>
   );
 };

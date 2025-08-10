@@ -45,6 +45,10 @@ export interface League {
   endDate: string;
   isActive: boolean;
   createdAt: string;
+  // Scheduling features
+  availableFields?: number;
+  gameStartTimes?: string[];
+  seasonWeeks?: number;
 }
 
 export interface Game {
@@ -60,6 +64,14 @@ export interface Game {
   awayScore?: number;
   status: 'Scheduled' | 'In Progress' | 'Completed' | 'Cancelled';
   createdAt: string;
+}
+
+export interface ScheduleGame {
+  homeTeamId: string;
+  awayTeamId: string;
+  week: number;
+  startTime: string;
+  fieldNumber: number;
 }
 
 export interface Poll {

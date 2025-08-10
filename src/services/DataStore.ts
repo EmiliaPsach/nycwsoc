@@ -917,4 +917,54 @@ export class DataStore {
       return [];
     }
   }
+
+  async getTeamsByLeague(leagueId: string): Promise<Team[]> {
+    return this.getTeamsInLeague(leagueId);
+  }
+
+  async getGamesByLeague(leagueId: string): Promise<Game[]> {
+    try {
+      const games = await this.getStoredData<Game[]>(this.GAMES_KEY) || [];
+      return games.filter(game => game.leagueId === leagueId);
+    } catch (error) {
+      console.error('Error getting games by league:', error);
+      return [];
+    }
+  }
+
+  async deleteGamesByLeague(leagueId: string): Promise<void> {
+    try {
+      const games = await this.getStoredData<Game[]>(this.GAMES_KEY) || [];
+      const filteredGames = games.filter(game => game.leagueId !== leagueId);
+      await this.setStoredData(this.GAMES_KEY, filteredGames);
+    } catch (error) {
+      console.error('Error deleting games by league:', error);
+      throw error;
+    }
+  }
+
+  async updateLeague(league: League): Promise<void> {
+    try {
+      const leagues = await this.getStoredData<League[]>(this.LEAGUES_KEY) || [];
+      const index = leagues.findIndex(l => l.id === league.id);
+      if (index >= 0) {
+        leagues[index] = league;
+        await this.setStoredData(this.LEAGUES_KEY, leagues);
+      }
+    } catch (error) {
+      console.error('Error updating league:', error);
+      throw error;
+    }
+  }
+
+  async createGame(game: Game): Promise<void> {
+    try {
+      const games = await this.getStoredData<Game[]>(this.GAMES_KEY) || [];
+      games.push(game);
+      await this.setStoredData(this.GAMES_KEY, games);
+    } catch (error) {
+      console.error('Error creating game:', error);
+      throw error;
+    }
+  }
 }

@@ -205,9 +205,6 @@ const AdminCreateTeamScreen = ({ navigation }: any) => {
   return (
     <View style={[globalStyles.container, { paddingTop: screenConfig.topPadding }]}>
       <View style={headerStyles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={[textStyles.body, { color: colors.primary }]}>← Cancel</Text>
-        </TouchableOpacity>
         <Text style={headerStyles.headerTitle}>Create Team</Text>
         <View style={{ width: 50 }} />
       </View>
@@ -268,7 +265,7 @@ const AdminCreateTeamScreen = ({ navigation }: any) => {
         </View>
 
         {selectedLeague && (
-          <View style={[cardStyles.card, { backgroundColor: colors.background.secondary }]}>
+          <View style={[cardStyles.card, { backgroundColor: colors.background.card }]}>
             <Text style={[textStyles.body, { fontWeight: typography.weight.semiBold, marginBottom: spacing.sm }]}>
               League Details:
             </Text>

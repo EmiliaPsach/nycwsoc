@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
@@ -19,6 +19,8 @@ import AdminCreateLeagueScreen from './src/screens/AdminCreateLeagueScreen';
 import AdminCreateTeamScreen from './src/screens/AdminCreateTeamScreen';
 import AdminPlayersScreen from './src/screens/AdminPlayersScreen';
 import AdminLeaguesScreen from './src/screens/AdminLeaguesScreen';
+import AdminLeagueDetailsScreen from './src/screens/AdminLeagueDetailsScreen';
+import AdminScheduleGamesScreen from './src/screens/AdminScheduleGamesScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import TeamDetailScreen from './src/screens/TeamDetailScreen';
 import GameDetailScreen from './src/screens/GameDetailScreen';
@@ -155,6 +157,16 @@ const MainStack = () => {
         name="AdminLeagues" 
         component={AdminLeaguesScreen}
         options={{ title: 'All Leagues' }}
+      />
+      <Stack.Screen 
+        name="AdminLeagueDetails" 
+        component={AdminLeagueDetailsScreen}
+        options={{ title: 'League Details' }}
+      />
+      <Stack.Screen 
+        name="AdminScheduleGames" 
+        component={AdminScheduleGamesScreen}
+        options={{ title: 'Schedule Games' }}
       />
     </Stack.Navigator>
   );

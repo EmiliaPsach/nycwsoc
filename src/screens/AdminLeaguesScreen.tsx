@@ -201,10 +201,10 @@ const AdminLeaguesScreen = ({ navigation }: any) => {
           </TouchableOpacity>
           <TouchableOpacity
             style={[buttonStyles.primary, { flex: 1, paddingVertical: spacing.sm }]}
-            onPress={() => navigation.navigate('AdminCreateTeam')}
+            onPress={() => navigation.navigate('AdminLeagueDetails', { leagueId: league.id })}
           >
             <Text style={[buttonStyles.primaryText, { fontSize: typography.size.sm }]}>
-              Add Team
+              Manage
             </Text>
           </TouchableOpacity>
         </View>
