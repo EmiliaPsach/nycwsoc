@@ -12,7 +12,6 @@ import ScheduleScreen from './src/screens/ScheduleScreen';
 import LeaguesBrowserScreen from './src/screens/LeaguesBrowserScreen';
 import LeagueRegistrationScreen from './src/screens/LeagueRegistrationScreen';
 import AdminDashboardScreen from './src/screens/AdminDashboardScreen';
-import AdminTeamsScreen from './src/screens/AdminTeamsScreen';
 import AdminSchedulesScreen from './src/screens/AdminSchedulesScreen';
 import AdminFreeAgentsScreen from './src/screens/AdminFreeAgentsScreen';
 import AdminRequestsScreen from './src/screens/AdminRequestsScreen';
@@ -123,11 +122,6 @@ const MainStack = () => {
         options={{ title: 'Join League' }}
       />
       <Stack.Screen 
-        name="AdminTeams" 
-        component={AdminTeamsScreen}
-        options={{ title: 'Manage Teams' }}
-      />
-      <Stack.Screen 
         name="AdminSchedules" 
         component={AdminSchedulesScreen}
         options={{ title: 'All Schedules' }}
@@ -169,19 +163,20 @@ const MainStack = () => {
 const AppContent = () => {
   const { user } = useAuth();
 
-  useEffect(() => {
-    // DEVELOPMENT ONLY: Reset storage to get fresh data
-    const resetStorage = async () => {
-      try {
-        await AsyncStorage.clear();
-        console.log('✅ AsyncStorage cleared - fresh data will be loaded');
-      } catch (err) {
-        console.error('❌ Failed to clear AsyncStorage:', err);
-      }
-    };
+  // useEffect(() => {
+  //   // DEVELOPMENT ONLY: Reset storage to get fresh data
+  //   const resetStorage = async () => {
+  //     try {
+  //       await AsyncStorage.clear();
+  //       console.log('✅ AsyncStorage cleared - fresh data will be loaded');
+  //     } catch (err) {
+  //       console.error('❌ Failed to clear AsyncStorage:', err);
+  //       }
+  //   };
     
-    resetStorage();
-  }, []);
+  //   resetStorage();
+  // }, []);
+  // Removed AsyncStorage.clear() to prevent login issues and crashes
   
   return (
     <NavigationContainer>

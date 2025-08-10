@@ -279,9 +279,6 @@ const AdminFreeAgentsScreen = ({ navigation }: any) => {
   return (
     <View style={[globalStyles.container, { paddingTop: screenConfig.topPadding }]}>
       <View style={headerStyles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={[textStyles.body, { color: colors.primary }]}>← Back</Text>
-        </TouchableOpacity>
         <Text style={headerStyles.headerTitle}>Free Agents ({freeAgents.length})</Text>
         <View style={{ width: 50 }} />
       </View>

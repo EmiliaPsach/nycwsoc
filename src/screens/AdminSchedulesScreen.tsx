@@ -203,9 +203,6 @@ const AdminSchedulesScreen = ({ navigation }: any) => {
   return (
     <View style={[globalStyles.container, { paddingTop: screenConfig.topPadding }]}>
       <View style={headerStyles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={[textStyles.body, { color: colors.primary }]}>← Back</Text>
-        </TouchableOpacity>
         <Text style={headerStyles.headerTitle}>All Schedules</Text>
         <View style={{ width: 50 }} />
       </View>

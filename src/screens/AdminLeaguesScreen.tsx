@@ -8,11 +8,13 @@ import {
   RefreshControl,
   Alert,
   Modal,
+  TextInput,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { DataStore } from '../services/DataStore';
 import { League, Team } from '../types';
+import { useCSVExport } from '../hooks/useCSVExport';
 import {
   globalStyles,
   cardStyles,
@@ -20,6 +22,7 @@ import {
   textStyles,
   buttonStyles,
   modalStyles,
+  formStyles,
   statusStyles,
   colors,
   spacing,
@@ -30,13 +33,16 @@ import {
 const AdminLeaguesScreen = ({ navigation }: any) => {
   const { user } = useAuth();
   const [leagues, setLeagues] = useState<League[]>([]);
+  const [filteredLeagues, setFilteredLeagues] = useState<League[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [searchText, setSearchText] = useState('');
   const [selectedLeague, setSelectedLeague] = useState<League | null>(null);
   const [leagueTeams, setLeagueTeams] = useState<Team[]>([]);
   const [teamsModalVisible, setTeamsModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const dataStore = new DataStore();
+  const { exportLeagues, isExporting } = useCSVExport();
 
   useFocusEffect(
     useCallback(() => {
@@ -52,6 +58,7 @@ const AdminLeaguesScreen = ({ navigation }: any) => {
       ]);
       
       setLeagues(allLeagues);
+      setFilteredLeagues(allLeagues);
       setTeams(allTeams);
     } catch (error) {
       console.error('Error loading leagues data:', error);
@@ -65,6 +72,20 @@ const AdminLeaguesScreen = ({ navigation }: any) => {
   const onRefresh = () => {
     setRefreshing(true);
     loadData();
+  };
+
+  const handleSearch = (text: string) => {
+    setSearchText(text);
+    if (text.trim() === '') {
+      setFilteredLeagues(leagues);
+    } else {
+      const filtered = leagues.filter(league =>
+        league.name.toLowerCase().includes(text.toLowerCase()) ||
+        league.skillLevel.toLowerCase().includes(text.toLowerCase()) ||
+        league.location.toLowerCase().includes(text.toLowerCase())
+      );
+      setFilteredLeagues(filtered);
+    }
   };
 
   const viewLeagueTeams = (league: League) => {
@@ -103,6 +124,19 @@ const AdminLeaguesScreen = ({ navigation }: any) => {
     if (now < startDate) return { status: 'Pre-Season', color: colors.status.inProgress };
     if (now <= endDate) return { status: 'Active', color: colors.status.completed };
     return { status: 'Completed', color: colors.text.secondary };
+  };
+
+  const handleExportCSV = async () => {
+    if (filteredLeagues.length === 0) {
+      Alert.alert('No Data', 'No leagues available to export');
+      return;
+    }
+    
+    try {
+      await exportLeagues(filteredLeagues, teams, { searchText });
+    } catch (error) {
+      console.error('Export error:', error);
+    }
   };
 
   const LeagueCard = ({ league }: { league: League }) => {
@@ -254,22 +288,76 @@ const AdminLeaguesScreen = ({ navigation }: any) => {
   return (
     <View style={[globalStyles.container, { paddingTop: screenConfig.topPadding }]}>
       <View style={headerStyles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={[textStyles.body, { color: colors.primary }]}>← Back</Text>
-        </TouchableOpacity>
-        <Text style={headerStyles.headerTitle}>All Leagues ({leagues.length})</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('AdminCreateLeague')}>
-          <Text style={[textStyles.body, { color: colors.primary, fontWeight: typography.weight.semiBold }]}>+ Create</Text>
-        </TouchableOpacity>
+        <Text style={headerStyles.headerTitle}>All Leagues ({filteredLeagues.length})</Text>
+        <View style={{ gap: spacing.sm }}>
+          <TouchableOpacity
+            onPress={handleExportCSV}
+            disabled={isExporting || filteredLeagues.length === 0}
+          >
+            <Text
+              style={[
+                textStyles.body,
+                {
+                  color:
+                    isExporting || filteredLeagues.length === 0
+                      ? colors.text.secondary
+                      : colors.primary,
+                  fontWeight: typography.weight.semiBold,
+                },
+              ]}
+            >
+              {isExporting ? "Exporting..." : "Export filtered league(s) to CSV"}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => navigation.navigate("AdminCreateLeague")}>
+            <Text
+              style={[
+                textStyles.body,
+                {
+                  color: colors.primary,
+                  fontWeight: typography.weight.semiBold,
+                },
+              ]}
+            >
+              Create a new league
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={{ paddingHorizontal: spacing.xl, paddingVertical: spacing.md }}>
+        <View style={formStyles.inputContainer}>
+          <TextInput
+            style={[formStyles.input, { marginBottom: 0 }]}
+            value={searchText}
+            onChangeText={handleSearch}
+            placeholder="Search leagues by name, skill level, or location..."
+            clearButtonMode="while-editing"
+          />
+        </View>
       </View>
 
       <ScrollView
-        style={{ flex: 1, padding: spacing.xl }}
+        style={{ flex: 1, padding: spacing.xl, paddingTop: 0 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        {leagues.length === 0 ? (
+        {filteredLeagues.length === 0 ? (
           <View style={globalStyles.emptyState}>
-            <Text style={globalStyles.emptyText}>No leagues found</Text>
+            <Text style={globalStyles.emptyText}>
+              {searchText.trim() !== '' ? 'No leagues found matching your search' : 'No leagues found'}
+            </Text>
+            {searchText.trim() !== '' && (
+              <TouchableOpacity
+                style={[buttonStyles.secondary, { marginTop: spacing.md }]}
+                onPress={() => {
+                  setSearchText('');
+                  setFilteredLeagues(leagues);
+                }}
+              >
+                <Text style={buttonStyles.secondaryText}>Clear Search</Text>
+              </TouchableOpacity>
+            )}
             <TouchableOpacity
               style={[buttonStyles.primary, { marginTop: spacing.md }]}
               onPress={() => navigation.navigate('AdminCreateLeague')}
@@ -278,9 +366,16 @@ const AdminLeaguesScreen = ({ navigation }: any) => {
             </TouchableOpacity>
           </View>
         ) : (
-          leagues.map(league => (
-            <LeagueCard key={league.id} league={league} />
-          ))
+          <>
+            {searchText.trim() !== '' && (
+              <Text style={[textStyles.caption, { marginBottom: spacing.lg, color: colors.text.secondary, textAlign: 'center' }]}>
+                Showing {filteredLeagues.length} of {leagues.length} leagues
+              </Text>
+            )}
+            {filteredLeagues.map(league => (
+              <LeagueCard key={league.id} league={league} />
+            ))}
+          </>
         )}
       </ScrollView>
 

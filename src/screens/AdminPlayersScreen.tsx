@@ -14,6 +14,7 @@ import { useAuth } from '../context/AuthContext';
 import { DataStore } from '../services/DataStore';
 import { User, Team } from '../types';
 import ProfilePicture from '../components/ProfilePicture';
+import { useCSVExport } from '../hooks/useCSVExport';
 import {
   globalStyles,
   cardStyles,
@@ -37,6 +38,7 @@ const AdminPlayersScreen = ({ navigation }: any) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const dataStore = new DataStore();
+  const { exportPlayers, isExporting } = useCSVExport();
 
   useFocusEffect(
     useCallback(() => {
@@ -85,6 +87,19 @@ const AdminPlayersScreen = ({ navigation }: any) => {
 
   const getPlayerTeams = (playerId: string): Team[] => {
     return teams.filter(team => team.players.includes(playerId));
+  };
+
+  const handleExportCSV = async () => {
+    if (filteredPlayers.length === 0) {
+      Alert.alert('No Data', 'No players available to export');
+      return;
+    }
+    
+    try {
+      await exportPlayers(filteredPlayers, teams, { searchText });
+    } catch (error) {
+      console.error('Export error:', error);
+    }
   };
 
   const PlayerCard = ({ player }: { player: User }) => {
@@ -182,11 +197,21 @@ const AdminPlayersScreen = ({ navigation }: any) => {
   return (
     <View style={[globalStyles.container, { paddingTop: screenConfig.topPadding }]}>
       <View style={headerStyles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={[textStyles.body, { color: colors.primary }]}>← Back</Text>
-        </TouchableOpacity>
         <Text style={headerStyles.headerTitle}>All Players ({filteredPlayers.length})</Text>
-        <View style={{ width: 50 }} />
+        <TouchableOpacity 
+          onPress={handleExportCSV}
+          disabled={isExporting || filteredPlayers.length === 0}
+        >
+          <Text style={[
+            textStyles.body, 
+            { 
+              color: isExporting || filteredPlayers.length === 0 ? colors.text.secondary : colors.primary,
+              fontWeight: typography.weight.semiBold 
+            }
+          ]}>
+            {isExporting ? 'Exporting...' : 'Export filtered player(s) to CSV'}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <View style={{ paddingHorizontal: spacing.xl, paddingVertical: spacing.md }}>

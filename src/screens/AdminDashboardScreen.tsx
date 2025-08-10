@@ -178,13 +178,6 @@ const AdminDashboardScreen = ({ navigation }: any) => {
         />
 
         <ActionCard
-          title="View All Teams & Players"
-          description="See all teams across leagues and manage player rosters"
-          icon="👥"
-          onPress={() => navigation.navigate('AdminTeams')}
-        />
-
-        <ActionCard
           title="League & Team Schedules"
           description="View and manage schedules for all leagues and teams"
           icon="📅"
