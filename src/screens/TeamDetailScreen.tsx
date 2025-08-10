@@ -350,7 +350,15 @@ const TeamDetailScreen = ({ route, navigation }: any) => {
       <View style={{marginBottom: spacing.xxl}}>
         <View style={headerStyles.sectionHeader}>
           <Text style={headerStyles.sectionTitle}>Games</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('MainTabs', { screen: 'Schedule' })}>
+          <TouchableOpacity onPress={() => {
+            // Navigate to admin schedules with team filter if user is admin, otherwise regular schedule
+            const isAdmin = user && (user.role === 'admin' || user.role === 'super_admin');
+            if (isAdmin) {
+              navigation.navigate('AdminSchedules', { teamId });
+            } else {
+              navigation.navigate('MainTabs', { screen: 'Schedule' });
+            }
+          }}>
             <Text style={headerStyles.sectionAction}>See All</Text>
           </TouchableOpacity>
         </View>

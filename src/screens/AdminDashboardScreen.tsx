@@ -158,16 +158,16 @@ const AdminDashboardScreen = ({ navigation }: any) => {
           <StatCard title="Free Agents" value={stats.pendingFreeAgents} color={colors.status.inProgress} />
         </View>
 
-        {/* Admin Actions */}
+        {/* Section 1: View Games/Leagues/Players/Teams */}
         <Text style={[headerStyles.sectionTitle, { marginBottom: spacing.lg }]}>
-          Admin Actions
+          📊 View Data
         </Text>
 
         <ActionCard
-          title="Search Players"
-          description="Search and view detailed information about all players"
-          icon="🔍"
-          onPress={() => navigation.navigate('AdminPlayers')}
+          title="League & Team Schedules"
+          description="View and manage schedules for all leagues and teams"
+          icon="📅"
+          onPress={() => navigation.navigate('AdminSchedules')}
         />
 
         <ActionCard
@@ -178,11 +178,16 @@ const AdminDashboardScreen = ({ navigation }: any) => {
         />
 
         <ActionCard
-          title="League & Team Schedules"
-          description="View and manage schedules for all leagues and teams"
-          icon="📅"
-          onPress={() => navigation.navigate('AdminSchedules')}
+          title="Search Players"
+          description="Search and view detailed information about all players"
+          icon="🔍"
+          onPress={() => navigation.navigate('AdminPlayers')}
         />
+
+        {/* Section 2: Manage Registrations */}
+        <Text style={[headerStyles.sectionTitle, { marginBottom: spacing.lg, marginTop: spacing.xl }]}>
+          📋 Manage Registrations
+        </Text>
 
         <ActionCard
           title="Team Registration Requests"
@@ -197,6 +202,11 @@ const AdminDashboardScreen = ({ navigation }: any) => {
           icon="🏃‍♂️"
           onPress={() => navigation.navigate('AdminFreeAgents')}
         />
+
+        {/* Section 3: Create Leagues or Teams */}
+        <Text style={[headerStyles.sectionTitle, { marginBottom: spacing.lg, marginTop: spacing.xl }]}>
+          ➕ Create New
+        </Text>
 
         <ActionCard
           title="Create League"

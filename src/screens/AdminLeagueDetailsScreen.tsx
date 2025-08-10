@@ -33,7 +33,7 @@ interface Props {
   navigation: any;
 }
 
-const AdminLeagueDetailScreen: React.FC<Props> = ({ route, navigation }) => {
+const AdminLeagueDetailScreen = ({ route, navigation }: any) => {
   const { leagueId } = route.params;
   const { user } = useAuth();
   const [league, setLeague] = useState<League | null>(null);
@@ -269,9 +269,9 @@ const AdminLeagueDetailScreen: React.FC<Props> = ({ route, navigation }) => {
 
           <TouchableOpacity
             style={buttonStyles.secondary}
-            onPress={() => navigation.navigate('AdminTeams')}
+            onPress={() => navigation.navigate('AdminSchedules', { leagueId })}
           >
-            <Text style={buttonStyles.secondaryText}>View All Teams</Text>
+            <Text style={buttonStyles.secondaryText}>View League Games</Text>
           </TouchableOpacity>
         </View>
 

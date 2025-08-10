@@ -1,6 +1,6 @@
 // utils/csvExport.ts
 import { Share, Platform, Alert } from 'react-native';
-import { User, Team, League } from '../types';
+import { User, Team, League, Game } from '../types';
 
 interface CSVExportConfig {
   filename: string;
@@ -100,6 +100,43 @@ class CSVExporter {
           { text: 'Export', onPress: async () => {
             try {
               const csvContent = this.generateTeamsCSV(teams, leagues, allUsers);
+              await this.shareCSV(csvContent, config);
+              resolve();
+            } catch (error) {
+              reject(error);
+            }
+          }}
+        ]
+      );
+    });
+  }
+
+  async exportGames(
+    games: Game[],
+    teams: Team[],
+    leagues: League[],
+    options: { searchText?: string } = {}
+  ): Promise<void> {
+    const { searchText = '' } = options;
+    const timestamp = new Date().toISOString().split('T')[0];
+    
+    const config: CSVExportConfig = {
+      filename: `games_export_${timestamp}.csv`,
+      title: `Export Games Data (${games.length} games)`,
+      confirmMessage: searchText.trim() !== '' 
+        ? `Export ${games.length} filtered games to CSV?`
+        : `Export all ${games.length} games to CSV?`
+    };
+
+    return new Promise((resolve, reject) => {
+      Alert.alert(
+        'Export Games',
+        config.confirmMessage,
+        [
+          { text: 'Cancel', style: 'cancel', onPress: () => reject(new Error('Export cancelled')) },
+          { text: 'Export', onPress: async () => {
+            try {
+              const csvContent = this.generateGamesCSV(games, teams, leagues);
               await this.shareCSV(csvContent, config);
               resolve();
             } catch (error) {
@@ -281,6 +318,48 @@ class CSVExporter {
         totalPlayers.toString(),
         league.isActive ? 'Yes' : 'No',
         new Date(league.createdAt).toLocaleDateString()
+      ];
+
+      csvRows.push(row.join(','));
+    }
+
+    return csvRows.join('\n');
+  }
+
+  private generateGamesCSV(games: Game[], teams: Team[], leagues: League[]): string {
+    const headers = [
+      'Date',
+      'Time',
+      'Home Team',
+      'Away Team',
+      'League',
+      'Location',
+      'Week',
+      'Status',
+      'Home Score',
+      'Away Score',
+      'Created Date'
+    ];
+
+    const csvRows = [headers.join(',')];
+
+    for (const game of games) {
+      const league = leagues.find(l => l.id === game.leagueId);
+      const homeTeam = teams.find(t => t.id === game.homeTeam);
+      const awayTeam = teams.find(t => t.id === game.awayTeam);
+
+      const row = [
+        new Date(game.date).toLocaleDateString(),
+        this.escapeCSVField(game.time),
+        this.escapeCSVField(homeTeam?.name || 'Unknown Team'),
+        this.escapeCSVField(awayTeam?.name || 'Unknown Team'),
+        this.escapeCSVField(league?.name || 'Unknown League'),
+        this.escapeCSVField(game.location),
+        game.week.toString(),
+        this.escapeCSVField(game.status),
+        game.homeScore?.toString() || '',
+        game.awayScore?.toString() || '',
+        new Date(game.createdAt).toLocaleDateString()
       ];
 
       csvRows.push(row.join(','));

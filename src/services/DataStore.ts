@@ -967,4 +967,20 @@ export class DataStore {
       throw error;
     }
   }
+
+  async updateGame(game: Game): Promise<void> {
+    try {
+      const games = await this.getStoredData<Game[]>(this.GAMES_KEY) || [];
+      const index = games.findIndex(g => g.id === game.id);
+      if (index >= 0) {
+        games[index] = game;
+        await this.setStoredData(this.GAMES_KEY, games);
+      } else {
+        throw new Error('Game not found');
+      }
+    } catch (error) {
+      console.error('Error updating game:', error);
+      throw error;
+    }
+  }
 }

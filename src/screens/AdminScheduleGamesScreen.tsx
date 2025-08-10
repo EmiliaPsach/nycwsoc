@@ -36,7 +36,7 @@ interface Props {
   navigation: any;
 }
 
-const AdminScheduleGamesScreen: React.FC<Props> = ({ route, navigation }) => {
+const AdminScheduleGamesScreen = ({ route, navigation }: any) => {
   const { leagueId } = route.params;
   const { user } = useAuth();
   const [league, setLeague] = useState<League | null>(null);

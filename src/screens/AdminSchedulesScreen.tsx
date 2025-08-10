@@ -14,6 +14,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { DataStore } from '../services/DataStore';
 import { Game, Team, League } from '../types';
+import { useCSVExport } from '../hooks/useCSVExport';
 import {
   globalStyles,
   cardStyles,
@@ -29,7 +30,7 @@ import {
   screenConfig
 } from '../styles';
 
-const AdminSchedulesScreen = ({ navigation }: any) => {
+const AdminSchedulesScreen = ({ navigation, route }: any) => {
   const { user } = useAuth();
   const [games, setGames] = useState<Game[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -43,11 +44,19 @@ const AdminSchedulesScreen = ({ navigation }: any) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const dataStore = new DataStore();
+  const { exportGames, isExporting } = useCSVExport();
 
   useFocusEffect(
     useCallback(() => {
       loadData();
-    }, [])
+      // Auto-filter by league or team if provided
+      if (route?.params?.leagueId) {
+        setSelectedLeague(route.params.leagueId);
+      }
+      if (route?.params?.teamId) {
+        setSelectedTeam(route.params.teamId);
+      }
+    }, [route?.params?.leagueId, route?.params?.teamId])
   );
 
   const loadData = async () => {
@@ -143,6 +152,7 @@ const AdminSchedulesScreen = ({ navigation }: any) => {
     setSelectedLeague(null);
     setSelectedTeam(null);
     setSearchText('');
+    setSelectedFilter('all');
   };
 
   const getFilteredTeams = () => {
@@ -150,6 +160,20 @@ const AdminSchedulesScreen = ({ navigation }: any) => {
       return teams.filter(team => team.leagueId === selectedLeague && team.isActive);
     }
     return teams.filter(team => team.isActive);
+  };
+
+  const handleExportCSV = async () => {
+    const filtered = getFilteredGames();
+    if (filtered.length === 0) {
+      Alert.alert('No Data', 'No games available to export');
+      return;
+    }
+    
+    try {
+      await exportGames(filtered, teams, leagues, { searchText });
+    } catch (error) {
+      console.error('Export error:', error);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -390,11 +414,27 @@ const AdminSchedulesScreen = ({ navigation }: any) => {
     <View style={[globalStyles.container, { paddingTop: screenConfig.topPadding }]}>
       <View style={headerStyles.header}>
         <Text style={headerStyles.headerTitle}>All Schedules</Text>
-        <TouchableOpacity onPress={clearFilters}>
-          <Text style={[textStyles.body, { color: colors.primary, fontWeight: typography.weight.semiBold }]}>
-            Clear All
-          </Text>
-        </TouchableOpacity>
+        <View style={{ gap: spacing.sm }}>
+          <TouchableOpacity 
+            onPress={handleExportCSV}
+            disabled={isExporting || getFilteredGames().length === 0}
+          >
+            <Text style={[
+              textStyles.body, 
+              { 
+                color: isExporting || getFilteredGames().length === 0 ? colors.text.secondary : colors.primary,
+                fontWeight: typography.weight.semiBold 
+              }
+            ]}>
+              {isExporting ? 'Exporting...' : 'Export filtered game(s) to CSV'}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('AdminCreateGame')}>
+            <Text style={[textStyles.body, { color: colors.primary, fontWeight: typography.weight.semiBold }]}>
+              Create a new game
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Search Bar */}
@@ -412,6 +452,11 @@ const AdminSchedulesScreen = ({ navigation }: any) => {
 
       {/* Status Filters */}
       <View style={{ paddingHorizontal: spacing.xl, paddingVertical: spacing.sm }}>
+        <TouchableOpacity onPress={clearFilters}>
+          <Text style={[textStyles.body, { color: colors.primary, fontWeight: typography.weight.semiBold }]}>
+            Clear All Filters
+          </Text>
+        </TouchableOpacity>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <FilterButton filter="upcoming" title="Upcoming" />
           <FilterButton filter="completed" title="Completed" />

@@ -21,6 +21,7 @@ import AdminPlayersScreen from './src/screens/AdminPlayersScreen';
 import AdminLeaguesScreen from './src/screens/AdminLeaguesScreen';
 import AdminLeagueDetailsScreen from './src/screens/AdminLeagueDetailsScreen';
 import AdminScheduleGamesScreen from './src/screens/AdminScheduleGamesScreen';
+import AdminCreateGameScreen from './src/screens/AdminCreateGameScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import TeamDetailScreen from './src/screens/TeamDetailScreen';
 import GameDetailScreen from './src/screens/GameDetailScreen';
@@ -167,6 +168,11 @@ const MainStack = () => {
         name="AdminScheduleGames" 
         component={AdminScheduleGamesScreen}
         options={{ title: 'Schedule Games' }}
+      />
+      <Stack.Screen 
+        name="AdminCreateGame" 
+        component={AdminCreateGameScreen}
+        options={{ title: 'Create Game' }}
       />
     </Stack.Navigator>
   );
