@@ -13,6 +13,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { DataStore } from '../services/DataStore';
 import { Game, Team } from '../types';
+import { GameCalendar } from '../components/GameCalendar';
 import {
   globalStyles,
   cardStyles,
@@ -589,7 +590,20 @@ const ScheduleScreen = ({ navigation }: any) => {
             </TouchableOpacity>
           </View>
         ) : (
-          viewMode === 'list' ? renderGamesByDate() : renderCalendarView()
+          viewMode === 'list' ? renderGamesByDate() : (
+            <GameCalendar
+              games={games}
+              teams={teams}
+              currentMonth={currentMonth}
+              onNavigateMonth={navigateMonth}
+              onGamePress={(gameId) => navigation.navigate('GameDetail', { gameId })}
+              getTeamName={async (teamId) => {
+                const team = await dataStore.getTeam(teamId);
+                return team?.name || 'Unknown Team';
+              }}
+              isUserTeam={(teamId) => teams.some(team => team.id === teamId)}
+            />
+          )
         )}
       </ScrollView>
 

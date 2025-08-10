@@ -9,12 +9,17 @@ import {
   Alert,
   TextInput,
   Modal,
+  Dimensions,
 } from 'react-native';
+
+const { width } = Dimensions.get('window');
+type ViewMode = 'list' | 'calendar';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { DataStore } from '../services/DataStore';
 import { Game, Team, League } from '../types';
 import { useCSVExport } from '../hooks/useCSVExport';
+import { GameCalendar } from '../components/GameCalendar';
 import {
   globalStyles,
   cardStyles,
@@ -43,6 +48,10 @@ const AdminSchedulesScreen = ({ navigation, route }: any) => {
   const [showTeamModal, setShowTeamModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [calendarVisible, setCalendarVisible] = useState(false);
   const dataStore = new DataStore();
   const { exportGames, isExporting } = useCSVExport();
 
@@ -207,6 +216,32 @@ const AdminSchedulesScreen = ({ navigation, route }: any) => {
     return `${dateText} at ${time}`;
   };
 
+  // Calendar helper functions
+  const getDaysInMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+  };
+
+  const getGamesForDate = (date: Date) => {
+    return getFilteredGames().filter(game => {
+      const gameDate = new Date(game.date);
+      return gameDate.toDateString() === date.toDateString();
+    });
+  };
+
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    const newMonth = new Date(currentMonth);
+    if (direction === 'prev') {
+      newMonth.setMonth(newMonth.getMonth() - 1);
+    } else {
+      newMonth.setMonth(newMonth.getMonth() + 1);
+    }
+    setCurrentMonth(newMonth);
+  };
+
   const FilterButton = ({ filter, title }: { filter: typeof selectedFilter; title: string }) => (
     <TouchableOpacity
       style={[
@@ -225,6 +260,7 @@ const AdminSchedulesScreen = ({ navigation, route }: any) => {
       </Text>
     </TouchableOpacity>
   );
+
 
   const GameCard = ({ game }: { game: Game }) => (
     <TouchableOpacity 
@@ -410,10 +446,93 @@ const AdminSchedulesScreen = ({ navigation, route }: any) => {
     );
   }
 
+  const renderGamesByDate = () => {
+    const filteredGames = getFilteredGames();
+    const gamesByDate = filteredGames.reduce((acc, game) => {
+      const dateKey = new Date(game.date).toDateString();
+      if (!acc[dateKey]) {
+        acc[dateKey] = [];
+      }
+      acc[dateKey].push(game);
+      return acc;
+    }, {} as { [key: string]: Game[] });
+
+    return Object.keys(gamesByDate).map(dateKey => {
+      const date = new Date(dateKey);
+      const dateGames = gamesByDate[dateKey];
+      
+      return (
+        <View key={dateKey} style={{marginBottom: spacing.xl}}>
+          <Text style={[headerStyles.sectionTitle, {marginLeft: spacing.xl, marginRight: spacing.xl, marginBottom: spacing.sm, marginTop: spacing.sm, fontSize: typography.size.lg, fontWeight: typography.weight.semiBold}]}>
+            {date.toLocaleDateString('en-US', { 
+              weekday: 'long', 
+              month: 'long', 
+              day: 'numeric' 
+            })}
+          </Text>
+          {dateGames.map(game => (
+            <GameCard key={game.id} game={game} />
+          ))}
+        </View>
+      );
+    });
+  };
+
   return (
     <View style={[globalStyles.container, { paddingTop: screenConfig.topPadding }]}>
       <View style={headerStyles.header}>
-        <Text style={headerStyles.headerTitle}>All Schedules</Text>
+        <View style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: spacing.md,
+        }}>
+          <Text style={headerStyles.headerTitle}>All Schedules</Text>
+          
+          {/* View Toggle */}
+          <View style={{
+            flexDirection: 'row',
+            backgroundColor: colors.background.card,
+            borderRadius: 8,
+            padding: 2,
+          }}>
+            <TouchableOpacity
+              onPress={() => setViewMode('list')}
+              style={{
+                paddingHorizontal: spacing.md,
+                paddingVertical: spacing.sm,
+                borderRadius: 6,
+                backgroundColor: viewMode === 'list' ? colors.primary : 'transparent',
+              }}
+            >
+              <Text style={{
+                fontSize: typography.size.sm,
+                fontWeight: typography.weight.medium,
+                color: viewMode === 'list' ? colors.text.inverse : colors.text.secondary,
+              }}>
+                List
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setViewMode('calendar')}
+              style={{
+                paddingHorizontal: spacing.md,
+                paddingVertical: spacing.sm,
+                borderRadius: 6,
+                backgroundColor: viewMode === 'calendar' ? colors.primary : 'transparent',
+              }}
+            >
+              <Text style={{
+                fontSize: typography.size.sm,
+                fontWeight: typography.weight.medium,
+                color: viewMode === 'calendar' ? colors.text.inverse : colors.text.secondary,
+              }}>
+                Calendar
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        
         <View style={{ gap: spacing.sm }}>
           <TouchableOpacity 
             onPress={handleExportCSV}
@@ -525,9 +644,16 @@ const AdminSchedulesScreen = ({ navigation, route }: any) => {
             </Text>
           </View>
         ) : (
-          filteredGames.map(game => (
-            <GameCard key={game.id} game={game} />
-          ))
+          viewMode === 'list' ? renderGamesByDate() : (
+            <GameCalendar
+              games={getFilteredGames()}
+              teams={teams}
+              currentMonth={currentMonth}
+              onNavigateMonth={navigateMonth}
+              onGamePress={(gameId) => navigation.navigate('GameDetail', { gameId })}
+              getTeamName={getTeamName}
+            />
+          )
         )}
       </ScrollView>
 
