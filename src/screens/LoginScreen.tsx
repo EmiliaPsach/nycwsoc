@@ -50,6 +50,11 @@ const LoginScreen = ({ navigation }: any) => {
     setPassword('demo');
   };
 
+  const handleAdminLogin = () => {
+    setEmail('admin@nycwsoc.com');
+    setPassword('admin');
+  };
+
   return (
     <KeyboardAvoidingView 
       style={[globalStyles.container, { paddingTop: screenConfig.topPadding }]} 
@@ -100,11 +105,20 @@ const LoginScreen = ({ navigation }: any) => {
           </TouchableOpacity>
 
           <TouchableOpacity 
-            style={buttonStyles.secondary} 
+            style={[buttonStyles.secondary, { marginBottom: spacing.md }]} 
             onPress={handleDemoLogin}
           >
             <Text style={buttonStyles.secondaryText}>
               Use Demo Account
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={buttonStyles.secondary} 
+            onPress={handleAdminLogin}
+          >
+            <Text style={buttonStyles.secondaryText}>
+              Use Admin Account
             </Text>
           </TouchableOpacity>
         </View>
