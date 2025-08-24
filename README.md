@@ -4,20 +4,26 @@ This is a vibe-coded MVP React Native iOS app for a [soccer league](https://www.
 
 I created this app largely to gain experience with full-stack app development before trying more advanced personal project ideas.
 
-Deployment costs $99/year on the App Store and a cloud-based data solution would also not be cheap, so I'm leaving this on GitHub for now until I refine the UI/UX well enough to potentially pitch it to the league.
+Deployment costs $99/year on the App Store and a cloud-based data solution would also not be cheap (~$30/month), so I'm leaving this on GitHub for now until I refine the UI/UX well enough to potentially pitch it to the league.
 
 ## App feature description
 
 To see all app features, read the [app's functionality documentation](docs/app_functionality.md).
 
-<img src="assets/player_screen.png" alt="player screen" width="200"/>
-<img src="assets/calendar_grid_view.png" alt="calendar grid view" width="200"/>
-<img src="assets/game_details.png" alt="game details" width="200"/>
-<img src="assets/league_registration.png" alt="league registration" width="200"/>
-<img src="assets/profile_screen.png" alt="profile screen" width="200"/>
-<img src="assets/login_screen.png" alt="login screen" width="200"/>
-<img src="assets/admin_dashboard.png" alt="admin dashboard" width="200"/>
-<img src="assets/schedule_search.png" alt="schedule search" width="200"/>
+<table>
+  <tr>
+    <td><img src="assets/player_screen.png" alt="player screen" width="180"/></td>
+    <td><img src="assets/calendar_grid_view.png" alt="calendar grid view" width="180"/></td>
+    <td><img src="assets/game_details.png" alt="game details" width="180"/></td>
+    <td><img src="assets/league_registration.png" alt="league registration" width="180"/></td>
+  </tr>
+  <tr>
+    <td><img src="assets/profile_screen.png" alt="profile screen" width="180"/></td>
+    <td><img src="assets/login_screen.png" alt="login screen" width="180"/></td>
+    <td><img src="assets/admin_dashboard.png" alt="admin dashboard" width="180"/></td>
+    <td><img src="assets/schedule_search.png" alt="schedule search" width="180"/></td>
+  </tr>
+</table>
 
 
 ## Development
