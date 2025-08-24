@@ -1,97 +1,46 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# React Native Soccer App
 
-# Getting Started
+This is a vibe-coded MVP React Native iOS app for a [soccer league](https://www.nycwsoc.com/) I joined in NYC.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+I created this app largely to gain experience with full-stack app development before trying more advanced personal project ideas.
 
-## Step 1: Start Metro
+Deployment costs $99/year on the App Store and a cloud-based data solution would also not be cheap, so I'm leaving this on GitHub for now until I refine the UI/UX well enough to potentially pitch it to the league.
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## App feature description
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+To see all app features, read the [app's functionality documentation](docs/app_functionality.md).
 
-```sh
-# Using npm
-npm start
+<img src="assets/player_screen.png" alt="player screen" width="200"/>
+<img src="assets/calendar_grid_view.png" alt="calendar grid view" width="200"/>
+<img src="assets/game_details.png" alt="game details" width="200"/>
+<img src="assets/league_registration.png" alt="league registration" width="200"/>
+<img src="assets/profile_screen.png" alt="profile screen" width="200"/>
+<img src="assets/login_screen.png" alt="login screen" width="200"/>
+<img src="assets/admin_dashboard.png" alt="admin dashboard" width="200"/>
+<img src="assets/schedule_search.png" alt="schedule search" width="200"/>
 
-# OR using Yarn
-yarn start
-```
 
-## Step 2: Build and run your app
+## Development
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+### Prereq: Environment set-up
 
-### Android
+1. Make sure you have completed React Native's [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+1. Adhere to this repo's [system requirements guide](docs/system_requirements.md).
 
-```sh
-# Using npm
-npm run android
+### Building and running the iOS app
 
-# OR using Yarn
-yarn android
-```
+1. Follow the [building and running instructions](docs/building_and_running.md) to build and run the app from just 1 simple Bash script
 
-### iOS
+## Future Work
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+Before distributing, I'd like to accomplish:
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
-
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+1. password authentication
+1. cloud database deployment
+1. UI/UX clean-up
+1. iron out few lingering navigational bugs
+1. replace dummy data with real-life data from the league
+1. add registration Google form that the actual league uses right now
+1. enable the CSV export in the Admin dashboard to export to a compatible format on the iPhone
+1. fix the UI to also look good in web-view
+1. verify that the notification reminder system works correctly
